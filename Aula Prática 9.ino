@@ -1,12 +1,12 @@
 // Aula Prática 9 - Indicador de Temperatura °C / °F
-//  Utilize o Arduino para desenvolver um sistema de indicação de temperatura em °C e °F. O 
-// sistema deve conter um sensor de temperatura (TMP36), um display LCD 16 x 2, dois botões 
+//  Utilize o Arduino para desenvolver um sistema de indicação de temperatura em °C e °F. O
+// sistema deve conter um sensor de temperatura (TMP36), um display LCD 16 x 2, dois botões
 // e três LED's (verde, azul e amarelo) devendo apresentar as características descritas a seguir.
-//  O sistema só funciona após o botão 1 ser pressionado (pulsado) e o LED verde acenderá. 
+//  O sistema só funciona após o botão 1 ser pressionado (pulsado) e o LED verde acenderá.
 // Se o botão 1 for pressionado novamente o sistema para de funcionar e o LED verde apaga.
 //  Utilize um display LCD 16x2 para exibir no monitor a temperatura de leitura (em °C e °F).
-//  O sistema inicia a indicação da temperatura em °C e o LED azul fica aceso até que o botão 
-// B2 seja pressionado. Após pressionar (pulsar) o botão 2, o sistema indica a temperatura em 
+//  O sistema inicia a indicação da temperatura em °C e o LED azul fica aceso até que o botão
+// B2 seja pressionado. Após pressionar (pulsar) o botão 2, o sistema indica a temperatura em
 // °F, o LED azul é apagado e o LED amarelo é aceso até que o botão 2 seja pressionado novamente.
 
 // Inclui a biblioteca do display LCD
@@ -56,27 +56,28 @@ void loop()
         digitalWrite(ledVerde, sistemaLigado ? HIGH : LOW);
 
         // Aguarda o botão ser solto
-        while (digitalRead(botao1) == HIGH)
-            ;
+        while (digitalRead(botao1) == HIGH);
         delay(50);
     }
 
     // Verifica se o sistema está ligado
     if (sistemaLigado)
     {
+        // Acende ou apaga os LEDs azul e amarelo de acordo com a unidade de temperatura selecionada
+        digitalWrite(ledAzul, tempCelsius ? HIGH : LOW);
+        digitalWrite(ledAmarelo, tempCelsius ? LOW : HIGH);
+
         // Verifica se o botão 2 foi pressionado
         if (digitalRead(botao2) == HIGH)
         {
             // Alterna entre Celsius e Fahrenheit
             tempCelsius = !tempCelsius;
 
-            // Acende ou apaga os LEDs azul e amarelo de acordo com a unidade de temperatura selecionada
-            digitalWrite(ledAzul, tempCelsius ? HIGH : LOW);
-            digitalWrite(ledAmarelo, tempCelsius ? LOW : HIGH);
+            // Limpa o display LCD
+            lcd.clear();
 
             // Aguarda o botão ser solto
-            while (digitalRead(botao2) == HIGH)
-                ;
+            while (digitalRead(botao2) == HIGH);
             delay(50);
         }
 
@@ -88,6 +89,7 @@ void loop()
         // Exibe a temperatura no display LCD na unidade selecionada
         lcd.setCursor(0, 0);
         lcd.print("Temperatura: ");
+        lcd.setCursor(0, 1);
         lcd.print(tempCelsius ? tempC : tempF);
         lcd.print(tempCelsius ? " C" : " F");
     }
@@ -95,5 +97,9 @@ void loop()
     {
         // Limpa o display LCD se o sistema estiver desligado
         lcd.clear();
+
+        // Apaga os LEDs azul e amarelo, caso estejam acesos
+        digitalWrite(ledAzul, LOW);
+        digitalWrite(ledAmarelo, LOW);
     }
 }

@@ -1,10 +1,10 @@
 // Aula Prática 10 - Teclado Matricial
 
-#include <LiquidCrystal.h>
+#include <Adafruit_LiquidCrystal.h>
 #include <Keypad.h>
 
-// Inicializa o display com os pinos do Arduino
-LiquidCrystal lcd(13, 12, 11, 10, 9, 8);
+// Inicializa o display com o endereço I2C do LCD
+Adafruit_LiquidCrystal lcd(0);
 
 const byte numLinhas = 4;  // número de linhas do teclado
 const byte numColunas = 4; // número de colunas do teclado

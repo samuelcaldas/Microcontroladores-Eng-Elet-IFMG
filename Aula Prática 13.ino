@@ -199,88 +199,6 @@ private:
 };
 
 /**
- * @brief Represents a system with ON and OFF buttons and an LED indicator
- */
-class Sistema
-{
-public:
-    /**
-     * @brief Initializes the system with the specified pins for the buttons and LED
-     * @param botaoLiga Pointer to the Button object representing the ON button
-     * @param botaoDesliga Pointer to the Button object representing the OFF button
-     * @param pinoLed The pin for the LED indicator
-     */
-
-    Sistema(Button *botaoLiga, Button *botaoDesliga, int pinoLed)
-    {
-        this->botaoLiga = botaoLiga;
-        this->botaoDesliga = botaoDesliga;
-        this->pinoLed = pinoLed;
-
-        pinMode(pinoLed, OUTPUT);
-
-        this->estado = false; // Initial state: off
-
-        atualizarLed();
-    }
-
-    /**
-     * @brief Checks if the ON button has been pressed and turns on the system
-     */
-    void verificarBotaoLiga()
-    {
-        if (botaoLiga->foiPressionado())
-        {
-            estado = true; // Turns on the system
-            atualizarLed();
-        }
-    }
-
-    /**
-     * @brief Checks if the OFF button has been pressed and turns off the system
-     */
-    void verificarBotaoDesliga()
-    {
-        if (botaoDesliga->foiPressionado())
-        {
-            estado = false; // Turns off the system
-            atualizarLed();
-        }
-    }
-
-    /**
-     * @brief Returns the current state of the system (on or off)
-     * @return The current state of the system
-     */
-    bool getEstado()
-    {
-        return estado;
-    }
-
-private:
-    Button *botaoLiga;
-    Button *botaoDesliga;
-    int pinoLed;
-
-    bool estado; // Current state of the system (on or off)
-
-    /**
-     * @brief Updates the state of the LED according to the system state
-     */
-    void atualizarLed()
-    {
-        if (estado)
-        {
-            digitalWrite(pinoLed, HIGH);
-        }
-        else
-        {
-            digitalWrite(pinoLed, LOW);
-        }
-    }
-};
-
-/**
  * @brief Class representing the control of the mixing process.
  */
 class Controle
@@ -423,6 +341,92 @@ private:
 };
 
 /**
+ * @brief Represents a system with ON and OFF buttons and an LED indicator
+ */
+class Sistema
+{
+public:
+    /**
+     * @brief Initializes the system with the specified pins for the buttons and LED
+     * @param botaoLiga Pointer to the Button object representing the ON button
+     * @param botaoDesliga Pointer to the Button object representing the OFF button
+     * @param pinoLed The pin for the LED indicator
+     * @param controle Pointer to the Controle object representing the control system
+     */
+
+    Sistema(Button *botaoLiga, Button *botaoDesliga, int pinoLed, Controle *controle)
+    {
+        this->botaoLiga = botaoLiga;
+        this->botaoDesliga = botaoDesliga;
+        this->pinoLed = pinoLed;
+        this->controle = controle;
+
+        pinMode(pinoLed, OUTPUT);
+
+        this->estado = false; // Initial state: off
+
+        atualizarLed();
+    }
+
+    /**
+     * @brief Checks if the ON button has been pressed and turns on the system
+     */
+    void verificarBotaoLiga()
+    {
+        if (botaoLiga->foiPressionado())
+        {
+            estado = true; // Turns on the system
+            atualizarLed();
+            controle->iniciarProcesso(); // Starts the process
+        }
+    }
+
+    /**
+     * @brief Checks if the OFF button has been pressed and turns off the system
+     */
+    void verificarBotaoDesliga()
+    {
+        if (botaoDesliga->foiPressionado())
+        {
+            estado = false; // Turns off the system
+            atualizarLed();
+            controle->desligar(); // Stops the process
+        }
+    }
+
+    /**
+     * @brief Returns the current state of the system (on or off)
+     * @return The current state of the system
+     */
+    bool getEstado()
+    {
+        return estado;
+    }
+
+private:
+    Button *botaoLiga;    // Pointer to the ON button
+    Button *botaoDesliga; // Pointer to the OFF button
+    int pinoLed;
+    Controle *controle; // Pointer to the Controle object
+    bool estado;        // Current state of the system (on or off)
+
+    /**
+     * @brief Updates the state of the LED according to the system state
+     */
+    void atualizarLed()
+    {
+        if (estado)
+        {
+            digitalWrite(pinoLed, HIGH);
+        }
+        else
+        {
+            digitalWrite(pinoLed, LOW);
+        }
+    }
+};
+
+/**
  * @brief Pin numbers of the components.
  */
 const int PINO_TANQUE_LEITE = A0;
@@ -463,7 +467,7 @@ Controle controle(&tanqueLeite, &tanqueEssencia, &tanqueMistura,
 Button botaoLiga(PINO_BOTAO_LIGA);
 Button botaoDesliga(PINO_BOTAO_DESLIGA);
 
-Sistema sistema(&botaoLiga, &botaoDesliga, PINO_LED);
+Sistema sistema(&botaoLiga, &botaoDesliga, PINO_LED, &controle);
 
 Nivel nivelLeite(PINO_TANQUE_LEITE, &tanqueLeite);
 Nivel nivelEssencia(PINO_TANQUE_ESSENCIA, &tanqueEssencia);

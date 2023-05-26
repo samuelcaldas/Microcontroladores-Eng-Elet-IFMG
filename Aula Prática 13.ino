@@ -12,6 +12,42 @@
 //       A simulação das saídas deverá ser feita através de LEDs.
 
 /**
+ * @brief Class representing a button with debounce control.
+ */
+class Button
+{
+public:
+    /**
+     * @brief Constructor for the Button class.
+     * @param pino The pin number of the button.
+     */
+    Button(int pino)
+    {
+        this->pino = pino;
+        pinMode(pino, INPUT_PULLUP);
+        this->ultimoTempo = 0;
+    }
+
+    /**
+     * @brief Checks if the button has been pressed.
+     * @return True if the button has been pressed, false otherwise.
+     */
+    bool foiPressionado()
+    {
+        if (digitalRead(pino) == LOW && millis() - ultimoTempo >= 200) // Debounce
+        {
+            ultimoTempo = millis();
+            return true;
+        }
+        return false;
+    }
+
+private:
+    int pino;
+    unsigned long ultimoTempo; // Last time the button was pressed
+};
+
+/**
  * @brief Class representing a tank.
  */
 class Tanque
@@ -170,24 +206,20 @@ class Sistema
 public:
     /**
      * @brief Initializes the system with the specified pins for the buttons and LED
-     * @param pinoBotaoLiga The pin for the ON button
-     * @param pinoBotaoDesliga The pin for the OFF button
+     * @param botaoLiga Pointer to the Button object representing the ON button
+     * @param botaoDesliga Pointer to the Button object representing the OFF button
      * @param pinoLed The pin for the LED indicator
      */
 
-    Sistema(int pinoBotaoLiga, int pinoBotaoDesliga, int pinoLed)
+    Sistema(Button *botaoLiga, Button *botaoDesliga, int pinoLed)
     {
-        this->pinoBotaoLiga = pinoBotaoLiga;
-        this->pinoBotaoDesliga = pinoBotaoDesliga;
+        this->botaoLiga = botaoLiga;
+        this->botaoDesliga = botaoDesliga;
         this->pinoLed = pinoLed;
 
-        pinMode(pinoBotaoLiga, INPUT_PULLUP);
-        pinMode(pinoBotaoDesliga, INPUT_PULLUP);
         pinMode(pinoLed, OUTPUT);
 
         this->estado = false; // Initial state: off
-        this->ultimoTempoBotaoLiga = 0;
-        this->ultimoTempoBotaoDesliga = 0;
 
         atualizarLed();
     }
@@ -197,11 +229,10 @@ public:
      */
     void verificarBotaoLiga()
     {
-        if (digitalRead(pinoBotaoLiga) == LOW && millis() - ultimoTempoBotaoLiga >= 200) // Debounce
+        if (botaoLiga->foiPressionado())
         {
             estado = true; // Turns on the system
             atualizarLed();
-            ultimoTempoBotaoLiga = millis();
         }
     }
 
@@ -210,11 +241,10 @@ public:
      */
     void verificarBotaoDesliga()
     {
-        if (digitalRead(pinoBotaoDesliga) == LOW && millis() - ultimoTempoBotaoDesliga >= 200) // Debounce
+        if (botaoDesliga->foiPressionado())
         {
             estado = false; // Turns off the system
             atualizarLed();
-            ultimoTempoBotaoDesliga = millis();
         }
     }
 
@@ -228,13 +258,11 @@ public:
     }
 
 private:
-    int pinoBotaoLiga;
-    int pinoBotaoDesliga;
+    Button *botaoLiga;
+    Button *botaoDesliga;
     int pinoLed;
 
-    bool estado;                           // Current state of the system (on or off)
-    unsigned long ultimoTempoBotaoLiga;    // Last time the ON button was pressed
-    unsigned long ultimoTempoBotaoDesliga; // Last time the OFF button was pressed
+    bool estado; // Current state of the system (on or off)
 
     /**
      * @brief Updates the state of the LED according to the system state
@@ -399,15 +427,21 @@ private:
  */
 const int PINO_TANQUE_LEITE = A0;
 const int PINO_TANQUE_ESSENCIA = A1;
+
 const int PINO_VALVULA_LEITE = 2;
 const int PINO_VALVULA_ESSENCIA = 3;
 const int PINO_VALVULA_SAIDA = 4;
+
 const int PINO_MOTOR = 5;
+
 const int PINO_BOTAO_LIGA = 6;
 const int PINO_BOTAO_DESLIGA = 7;
+
 const int PINO_LED = 8;
 
-// Capacities of the tanks (in liters)
+/**
+ * @brief Capacities of the tanks (in liters)
+ */
 const int CAPACIDADE_TANQUE_LEITE = 10000;
 const int CAPACIDADE_TANQUE_ESSENCIA = 10000;
 const int CAPACIDADE_TANQUE_MISTURA = 20000;
@@ -426,14 +460,15 @@ Controle controle(&tanqueLeite, &tanqueEssencia, &tanqueMistura,
                   &valvulaLeite, &valvulaEssencia, &valvulaSaida,
                   &motor);
 
-Sistema sistema(PINO_BOTAO_LIGA, PINO_BOTAO_DESLIGA, PINO_LED);
+Button botaoLiga(PINO_BOTAO_LIGA);
+Button botaoDesliga(PINO_BOTAO_DESLIGA);
+
+Sistema sistema(&botaoLiga, &botaoDesliga, PINO_LED);
 
 Nivel nivelLeite(PINO_TANQUE_LEITE, &tanqueLeite);
 Nivel nivelEssencia(PINO_TANQUE_ESSENCIA, &tanqueEssencia);
 
-void setup()
-{
-}
+void setup() {}
 
 void loop()
 {

@@ -1,15 +1,21 @@
-// Aula Prática 12 - CONTROLE DE MISTURA LEITE/ESSÊNCIA
-// A. Ao pulsar o botão LIGA, os volumes dos tanques de Leite e de Essência são memorizados e a Válvula de Leite deverá ser aberta por 5 segundos;
-// B. Em seguida, a Válvula de Essência deverá ser aberta até a mistura atingir a proporção de 1 parte de essência para 10 partes de leite.
-//    Quando o tanque de Essência esvaziar até atingir a proporção adequada, a Válvula de Essência deverá ser fechada.
-// C. O Motor deverá ser ligado por 10 segundos, em seguida desligado e a Válvula de Saída aberta.
-// D. Após abrir a Válvula de Saída e o tanque esvaziar, ela deverá ser novamente fechada.
-// E. O ciclo é reiniciado ao pulsar novamente o botão LIGA. Em qualquer momento que o botão DESLIGA for pulsado,
-//    o Motor deverá ser desligado e as válvulas fechadas;
-// F. Deverá existir uma sinalização exclusiva para controle ligado.
-// Obs.: Considere que os tanques de Leite e Essência tenham capacidade de 10.000 litros e o de Mistura tenha capacidade de 20.000 litros.
-//       A simulação dos níveis nos tanques de Leite e Essência serão simulados através de potenciômetros.
-//       A simulação das saídas deverá ser feita através de LEDs.
+/**
+ * @file Aula Prática 13.ino
+ * @brief Aula Prática 12 - CONTROLE DE MISTURA LEITE/ESSÊNCIA
+ * @version 1.0
+ * @date 2023-05-26
+ * 
+ * A. Ao pulsar o botão LIGA, os volumes dos tanques de Leite e de Essência são memorizados e a Válvula de Leite deverá ser aberta por 5 segundos;
+ * B. Em seguida, a Válvula de Essência deverá ser aberta até a mistura atingir a proporção de 1 parte de essência para 10 partes de leite.
+ *    Quando o tanque de Essência esvaziar até atingir a proporção adequada, a Válvula de Essência deverá ser fechada.
+ * C. O Motor deverá ser ligado por 10 segundos, em seguida desligado e a Válvula de Saída aberta.
+ * D. Após abrir a Válvula de Saída e o tanque esvaziar, ela deverá ser novamente fechada.
+ * E. O ciclo é reiniciado ao pulsar novamente o botão LIGA. Em qualquer momento que o botão DESLIGA for pulsado,
+ *    o Motor deverá ser desligado e as válvulas fechadas;
+ * F. Deverá existir uma sinalização exclusiva para controle ligado.
+ * Obs.: Considere que os tanques de Leite e Essência tenham capacidade de 10.000 litros e o de Mistura tenha capacidade de 20.000 litros.
+ *       A simulação dos níveis nos tanques de Leite e Essência serão simulados através de potenciômetros.
+ *       A simulação das saídas deverá ser feita através de LEDs.
+ */
 
 /**
  * @brief Class representing a button with debounce control.

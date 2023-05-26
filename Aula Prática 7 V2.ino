@@ -6,17 +6,12 @@
 // - O sistema só retornará quando o botão for pressionado e a temperatura estiver abaixo dos 25ºC;
 // - Utilize o canal serial para exibir a temperatura de leitura no monitor serial;
 
-// Definir o pinos do sensor de temperatura e o tipo de sensor
-#include "DHT.h"
-#define DHTPIN A5 // pino do sensor de temperatura
-#define DHTTYPE DHT11
-DHT dht(DHTPIN, DHTTYPE);
-
 // Definir os pinos dos botões e do LED
-#define LED_AZUL 4     // pino do LED azul
-#define LED_AMARELO 3  // pino do LED amarelo
-#define LED_VERMELHO 2 // pino do LED vermelho
-#define botao 5        // pino do botão
+#define LED_AZUL 4           // pino do LED azul
+#define LED_AMARELO 3        // pino do LED amarelo
+#define LED_VERMELHO 2       // pino do LED vermelho
+#define botao 5              // pino do botão
+#define sensorTemperatura A5 // pino do sensor de temperatura
 
 // Variáveis
 int s = 1;                     // estado do sistema
@@ -31,15 +26,15 @@ void setup()
     pinMode(LED_VERMELHO, OUTPUT); // define o pino do LED vermelho como saída
     pinMode(botao, INPUT);         // define o pino do botão como entrada
     Serial.begin(9600);            // inicia a comunicação serial
-    dht.begin();
 }
 
 void loop()
 {
-    estadoBotao = digitalRead(botao);    // lê o estado do botão
-    temperatura = dht.readTemperature(); // lê o valor do sensor de temperatura
-
-    if (temperatura != temperaturaAnterior) // se a temperatura for diferente da temperatura anterior
+    estadoBotao = digitalRead(botao);                // lê o estado do botão
+    int valorSensor = analogRead(sensorTemperatura); // lê o valor do sensor de temperatura
+    float voltage = (valorSensor * 5.0) / 1024.0;    // converte o valor lido para tensão
+    temperatura = (voltage - 0.5) * 100;             // converte a tensão para temperatura em graus Celsius
+    if (temperatura != temperaturaAnterior)          // se a temperatura for diferente da temperatura anterior
     {
         temperaturaAnterior = temperatura; // atualiza a temperatura anterior
         Serial.print("Temperatura:");      // exibe a mensagem no monitor serial

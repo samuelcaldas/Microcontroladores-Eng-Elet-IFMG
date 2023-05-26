@@ -131,9 +131,17 @@ private:
     int pino;
 };
 
+/**
+ * @brief Represents a sensor that reads the value of a potentiometer and updates the volume of a tank
+ */
 class Nivel
 {
 public:
+    /**
+     * @brief Initializes the sensor with the specified pin and tank
+     * @param pino The pin for the potentiometer
+     * @param tanque The tank to be updated
+     */
     Nivel(int pino, Tanque *tanque)
     {
         this->pino = pino;
@@ -154,9 +162,19 @@ private:
     Tanque *tanque;
 };
 
+/**
+ * @brief Represents a system with ON and OFF buttons and an LED indicator
+ */
 class Sistema
 {
 public:
+    /**
+     * @brief Initializes the system with the specified pins for the buttons and LED
+     * @param pinoBotaoLiga The pin for the ON button
+     * @param pinoBotaoDesliga The pin for the OFF button
+     * @param pinoLed The pin for the LED indicator
+     */
+
     Sistema(int pinoBotaoLiga, int pinoBotaoDesliga, int pinoLed)
     {
         this->pinoBotaoLiga = pinoBotaoLiga;
@@ -202,6 +220,7 @@ public:
 
     /**
      * @brief Returns the current state of the system (on or off)
+     * @return The current state of the system
      */
     bool getEstado()
     {

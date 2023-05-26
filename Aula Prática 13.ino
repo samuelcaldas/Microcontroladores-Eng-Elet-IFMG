@@ -1,10 +1,10 @@
 // Aula Prática 12 - CONTROLE DE MISTURA LEITE/ESSÊNCIA
 // A. Ao pulsar o botão LIGA, os volumes dos tanques de Leite e de Essência são memorizados e a Válvula de Leite deverá ser aberta por 5 segundos;
-// B. Em seguida, a Válvula de Essência deverá ser aberta até a mistura atingir a proporção de 1 parte de essência para 10 partes de leite. 
+// B. Em seguida, a Válvula de Essência deverá ser aberta até a mistura atingir a proporção de 1 parte de essência para 10 partes de leite.
 //    Quando o tanque de Essência esvaziar até atingir a proporção adequada, a Válvula de Essência deverá ser fechada.
 // C. O Motor deverá ser ligado por 10 segundos, em seguida desligado e a Válvula de Saída aberta.
 // D. Após abrir a Válvula de Saída e o tanque esvaziar, ela deverá ser novamente fechada.
-// E. O ciclo é reiniciado ao pulsar novamente o botão LIGA. Em qualquer momento que o botão DESLIGA for pulsado, 
+// E. O ciclo é reiniciado ao pulsar novamente o botão LIGA. Em qualquer momento que o botão DESLIGA for pulsado,
 //    o Motor deverá ser desligado e as válvulas fechadas;
 // F. Deverá existir uma sinalização exclusiva para controle ligado.
 // Obs.: Considere que os tanques de Leite e Essência tenham capacidade de 10.000 litros e o de Mistura tenha capacidade de 20.000 litros.
@@ -131,6 +131,108 @@ private:
     int pino;
 };
 
+class Nivel
+{
+public:
+    Nivel(int pino, Tanque *tanque)
+    {
+        this->pino = pino;
+        this->tanque = tanque;
+    }
+
+    /**
+     * @brief Reads the value of the potentiometer and updates the tank volume
+     */
+    void atualizar()
+    {
+        int volume = map(analogRead(pino), 0, 1023, 0, tanque->getCapacidadeMaxima());
+        tanque->setVolumeAtual(volume);
+    }
+
+private:
+    int pino;
+    Tanque *tanque;
+};
+
+class Sistema
+{
+public:
+    Sistema(int pinoBotaoLiga, int pinoBotaoDesliga, int pinoLed)
+    {
+        this->pinoBotaoLiga = pinoBotaoLiga;
+        this->pinoBotaoDesliga = pinoBotaoDesliga;
+        this->pinoLed = pinoLed;
+
+        pinMode(pinoBotaoLiga, INPUT_PULLUP);
+        pinMode(pinoBotaoDesliga, INPUT_PULLUP);
+        pinMode(pinoLed, OUTPUT);
+
+        this->estado = false; // Initial state: off
+        this->ultimoTempoBotaoLiga = 0;
+        this->ultimoTempoBotaoDesliga = 0;
+
+        atualizarLed();
+    }
+
+    /**
+     * @brief Checks if the ON button has been pressed and turns on the system
+     */
+    void verificarBotaoLiga()
+    {
+        if (digitalRead(pinoBotaoLiga) == LOW && millis() - ultimoTempoBotaoLiga >= 200) // Debounce
+        {
+            estado = true; // Turns on the system
+            atualizarLed();
+            ultimoTempoBotaoLiga = millis();
+        }
+    }
+
+    /**
+     * @brief Checks if the OFF button has been pressed and turns off the system
+     */
+    void verificarBotaoDesliga()
+    {
+        if (digitalRead(pinoBotaoDesliga) == LOW && millis() - ultimoTempoBotaoDesliga >= 200) // Debounce
+        {
+            estado = false; // Turns off the system
+            atualizarLed();
+            ultimoTempoBotaoDesliga = millis();
+        }
+    }
+
+    /**
+     * @brief Returns the current state of the system (on or off)
+     */
+    bool getEstado()
+    {
+        return estado;
+    }
+
+private:
+    int pinoBotaoLiga;
+    int pinoBotaoDesliga;
+    int pinoLed;
+
+    bool estado;                           // Current state of the system (on or off)
+    unsigned long ultimoTempoBotaoLiga;    // Last time the ON button was pressed
+    unsigned long ultimoTempoBotaoDesliga; // Last time the OFF button was pressed
+
+    /**
+     * @brief Updates the state of the LED according to the system state
+     */
+    void atualizarLed()
+    {
+        if (estado)
+        {
+            digitalWrite(pinoLed, HIGH);
+        }
+        else
+        {
+            digitalWrite(pinoLed, LOW);
+        }
+    }
+};
+
 /**
  * @brief Class representing the control of the mixing process.
  */
@@ -170,7 +272,7 @@ public:
     {
         if (estado == 0) // Initial state
         {
-            // Memorizes the volumes of the milk and essence tanks
+            // Stores the volumes of the milk and essence tanks
             volumeLeiteInicial = tanqueLeite->getVolumeAtual();
             volumeEssenciaInicial = tanqueEssencia->getVolumeAtual();
 
@@ -182,7 +284,7 @@ public:
     }
 
     /**
-     * @brief Updates the control of the mixing process.
+     * @brief Updates the control state according to time and tank volumes
      */
     void atualizar()
     {
@@ -241,7 +343,7 @@ public:
     }
 
     /**
-     * @brief Turns off the mixing process.
+     * @brief Turns off the system and closes all valves and turns off the motor
      */
     void desligar()
     {
@@ -256,7 +358,6 @@ public:
             estado = 0; // Returns to the initial state
         }
     }
-    
 
 private:
     Tanque *tanqueLeite;
@@ -285,6 +386,7 @@ const int PINO_VALVULA_SAIDA = 4;
 const int PINO_MOTOR = 5;
 const int PINO_BOTAO_LIGA = 6;
 const int PINO_BOTAO_DESLIGA = 7;
+const int PINO_LED = 8;
 
 // Capacities of the tanks (in liters)
 const int CAPACIDADE_TANQUE_LEITE = 10000;
@@ -305,38 +407,32 @@ Controle controle(&tanqueLeite, &tanqueEssencia, &tanqueMistura,
                   &valvulaLeite, &valvulaEssencia, &valvulaSaida,
                   &motor);
 
+Sistema sistema(PINO_BOTAO_LIGA, PINO_BOTAO_DESLIGA, PINO_LED);
+
+Nivel nivelLeite(PINO_TANQUE_LEITE, &tanqueLeite);
+Nivel nivelEssencia(PINO_TANQUE_ESSENCIA, &tanqueEssencia);
+
 void setup()
 {
-    // Configures the button pins as input
-    pinMode(PINO_BOTAO_LIGA, INPUT_PULLUP);
-    pinMode(PINO_BOTAO_DESLIGA, INPUT_PULLUP);
 }
 
 void loop()
 {
-    // Reads the potentiometer values and updates the tank volumes
-    int volumeLeite = map(analogRead(PINO_TANQUE_LEITE), 0, 1023, 0, CAPACIDADE_TANQUE_LEITE);
-    int volumeEssencia = map(analogRead(PINO_TANQUE_ESSENCIA), 0, 1023, 0, CAPACIDADE_TANQUE_ESSENCIA);
+    // Updates the tank volumes
+    nivelLeite.atualizar();
+    nivelEssencia.atualizar();
 
-    tanqueLeite.setVolumeAtual(volumeLeite);
-    tanqueEssencia.setVolumeAtual(volumeEssencia);
+    // Checks if the LIGA button has been pressed
+    sistema.verificarBotaoLiga();
 
-    // Checks if the LIGA button was pressed
-    if (digitalRead(PINO_BOTAO_LIGA) == LOW)
+    // Checks if the DESLIGA button has been pressed
+    sistema.verificarBotaoDesliga();
+
+    // If the system is on, update the control
+    if (sistema.getEstado())
     {
-        controle.iniciarProcesso();
-        delay(1000); // Waits for 1 second to avoid multiple presses
+        controle.atualizar();
     }
-
-    // Checks if the DESLIGA button was pressed
-    if (digitalRead(PINO_BOTAO_DESLIGA) == LOW)
-    {
-        controle.desligar();
-        delay(1000); // Waits for 1 second to avoid multiple presses
-    }
-
-    // Updates the control
-    controle.atualizar();
 }
 
 // Conclusão

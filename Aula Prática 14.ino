@@ -7,13 +7,14 @@ const int CHAVE_SELETORA_PIN = 6;
 const int BOTAO_1_PIN = 7;
 const int BOTAO_2_PIN = 8;
 const int SENSOR_ANALOGICO_PIN = A0;
-const int SENSOR_DIGITAL_1_PIN = 9;
-const int SENSOR_DIGITAL_2_PIN = 10;
-const int SENSOR_DIGITAL_3_PIN = 11;
-const int SENSOR_DIGITAL_4_PIN = 12;
 
 // Define constants for debounce time
 const unsigned long DEBOUNCE_DELAY = 50;
+
+// Define constants for water level thresholds
+const int NIVEL_BAIXO = 25;
+const int NIVEL_MEDIO = 50;
+const int NIVEL_ALTO = 75;
 
 // Define a class to represent the reservoir
 class Reservatorio
@@ -175,52 +176,50 @@ private:
   bool estado = true;
 };
 
-// Define a class to represent a digital water level sensor
-class SensorNivelDigital
+// Define an interface for water level sensors
+class SensorNivel
 {
 public:
-  SensorNivelDigital(int pin1, int pin2, int pin3, int pin4)
-      : pin1(pin1), pin2(pin2), pin3(pin3), pin4(pin4)
+  virtual int lerNivel() = 0;
+};
+
+// Define a class to represent a digital water level sensor
+class SensorNivelDigital : public SensorNivel
+{
+public:
+  SensorNivelDigital(const int *pPinos, int numPinos)
+      : pPinos(pPinos), numPinos(numPinos)
   {
-    pinMode(pin1, INPUT_PULLUP);
-    pinMode(pin2, INPUT_PULLUP);
-    pinMode(pin3, INPUT_PULLUP);
-    pinMode(pin4, INPUT_PULLUP);
+    for (int i = 0; i < numPinos; i++)
+    {
+      pinMode(pPinos[i], INPUT_PULLUP);
+    }
   }
 
-  int lerNivel()
+  virtual int lerNivel()
   {
-    bool nivelBaixoAcionado = digitalRead(pin1) == LOW;
-    bool nivelMedioAcionado = digitalRead(pin2) == LOW;
-    bool nivelAltoAcionado = digitalRead(pin3) == LOW;
-    bool nivelMaximoAcionado = digitalRead(pin4) == LOW;
-
-    if (nivelMaximoAcionado)
-      return 100;
-    else if (nivelAltoAcionado)
-      return 75;
-    else if (nivelMedioAcionado)
-      return 50;
-    else if (nivelBaixoAcionado)
-      return 25;
-    else
-      return 0;
+    for (int i = 0; i < numPinos; i++)
+    {
+      if (digitalRead(pPinos[i]) == LOW)
+      {
+        return map(i + 1, 1, numPinos, 0, 100);
+      }
+    }
+    return 0;
   }
 
 private:
-  const int pin1;
-  const int pin2;
-  const int pin3;
-  const int pin4;
+  const int *pPinos;
+  const int numPinos;
 };
 
 // Define a class to represent an analog water level sensor
-class SensorNivelAnalogico
+class SensorNivelAnalogico : public SensorNivel
 {
 public:
   SensorNivelAnalogico(int pin) : pin(pin) {}
 
-  int lerNivel()
+  virtual int lerNivel()
   {
     return map(analogRead(pin), 0, 1023, 0, 100);
   }
@@ -241,8 +240,7 @@ public:
                     ChaveSeletora *chaveSeletora,
                     Botao *botao1,
                     Botao *botao2,
-                    SensorNivelDigital *sensorNivelDigital,
-                    SensorNivelAnalogico *sensorNivelAnalogico)
+                    SensorNivel *sensorNivel)
       : reservatorio(reservatorio),
         bomba1(bomba1),
         bomba2(bomba2),
@@ -251,8 +249,7 @@ public:
         chaveSeletora(chaveSeletora),
         botao1(botao1),
         botao2(botao2),
-        sensorNivelDigital(sensorNivelDigital),
-        sensorNivelAnalogico(sensorNivelAnalogico) {}
+        sensorNivel(sensorNivel) {}
 
   void atualizar()
   {
@@ -264,9 +261,7 @@ public:
     {
       // Automatic mode
 
-      // Uncomment one of the following lines to use either digital or analog water level sensors
-      // reservatorio->setNivel(sensorNivelDigital->lerNivel());
-      // reservatorio->setNivel(sensorNivelAnalogico->lerNivel());
+      reservatorio->setNivel(sensorNivel->lerNivel());
 
       if (reservatorio->getNivel() < NIVEL_BAIXO)
       {
@@ -328,8 +323,7 @@ private:
   ChaveSeletora *chaveSeletora;
   Botao *botao1;
   Botao *botao2;
-  SensorNivelDigital *sensorNivelDigital;
-  SensorNivelAnalogico *sensorNivelAnalogico;
+  SensorNivel *sensorNivel;
 };
 
 // Create objects for reservoir, pumps and LEDs
@@ -345,8 +339,10 @@ Botao botao1(BOTAO_1_PIN);
 Botao botao2(BOTAO_2_PIN);
 
 // Create objects for water level sensors
-SensorNivelDigital sensorNivelDigital(SENSOR_DIGITAL_1_PIN, SENSOR_DIGITAL_2_PIN, SENSOR_DIGITAL_3_PIN, SENSOR_DIGITAL_4_PIN);
-SensorNivelAnalogico sensorNivelAnalogico(SENSOR_ANALOGICO_PIN);
+const int pinoSensores[] = {9, 10, 11, 12};
+// Uncomment one of the following lines to use either digital or analog water level sensors
+SensorNivelDigital sensorNivel(pinoSensores, sizeof(pinoSensores) / sizeof(pinoSensores[0]));
+// SensorNivelAnalogico sensorNivel(SENSOR_ANALOGICO_PIN);
 
 // Create object for control system
 SistemaDeControle sistemaDeControle(&reservatorio,
@@ -357,8 +353,7 @@ SistemaDeControle sistemaDeControle(&reservatorio,
                                     &chaveSeletora,
                                     &botao1,
                                     &botao2,
-                                    &sensorNivelDigital,
-                                    &sensorNivelAnalogico);
+                                    &sensorNivel);
 
 void setup() {}
 

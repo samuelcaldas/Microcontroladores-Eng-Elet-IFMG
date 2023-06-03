@@ -1,6 +1,6 @@
 /**
  * @file Aula Prática 12.ino
- * @brief Aula Prática - CONTROLE DE NÍVEL DE RESERVATÓRIO
+ * @brief Aula Prática 12 - CONTROLE DE NÍVEL DE RESERVATÓRIO
  * @version 1.0
  * @date 2023-06-03
  *

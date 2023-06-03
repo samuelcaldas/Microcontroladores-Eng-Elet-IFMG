@@ -451,10 +451,12 @@ public:
   {
     if (chaveSeletora->estaLigado())
     {
+      ledModoAutomatico->ligar();
       modoAutomatico();
     }
     else
     {
+      ledModoAutomatico->desligar();
       modoManual();
     }
   }
@@ -502,8 +504,6 @@ private:
       bomba1->desligar();
       bomba2->desligar();
     }
-
-    ledModoAutomatico->ligar();
   }
 
   /**
@@ -532,8 +532,6 @@ private:
     {
       bomba2->desligar();
     }
-
-    ledModoAutomatico->desligar();
   }
 };
 

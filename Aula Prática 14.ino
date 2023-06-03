@@ -4,17 +4,20 @@ const int BOMBA_2_PIN = 3;
 const int LED_VERDE_PIN = 4;
 const int LED_AMARELO_PIN = 5;
 const int CHAVE_SELETORA_PIN = 6;
-const int BOTAO_1_PIN = 7;
-const int BOTAO_2_PIN = 8;
+const int BOTAO_BOMBA_1_PIN = 7;
+const int BOTAO_BOMBA_2_PIN = 8;
 const int SENSOR_ANALOGICO_PIN = A0;
-
-// Define constants for debounce time
-const unsigned long DEBOUNCE_DELAY = 50;
+const int LED_BOMBA_1_PIN = 9;
+const int LED_BOMBA_2_PIN = 10;
 
 // Define constants for water level thresholds
 const int NIVEL_BAIXO = 25;
 const int NIVEL_MEDIO = 50;
 const int NIVEL_ALTO = 75;
+
+// Define constants for debounce time
+
+const unsigned long DEBOUNCE_DELAY = 50;
 
 // Define a class to represent the reservoir
 class Reservatorio
@@ -48,10 +51,10 @@ class Bomba
 {
 public:
   // Constructor
-  Bomba(int pin)
+  Bomba(int pin, int ledPin) : pin(pin), ledPin(ledPin)
   {
-    this->pin = pin;
     pinMode(pin, OUTPUT);
+    pinMode(ledPin, OUTPUT);
     desligar();
   }
 
@@ -59,17 +62,20 @@ public:
   void ligar()
   {
     digitalWrite(pin, HIGH);
+    digitalWrite(ledPin, HIGH);
   }
 
   // Method to turn off the pump
   void desligar()
   {
     digitalWrite(pin, LOW);
+    digitalWrite(ledPin, LOW);
   }
 
 private:
   // Pin number
   int pin;
+  int ledPin;
 };
 
 // Define a class to represent the LED
@@ -238,8 +244,8 @@ public:
                     LED *ledVerde,
                     LED *ledAmarelo,
                     ChaveSeletora *chaveSeletora,
-                    Botao *botao1,
-                    Botao *botao2,
+                    Botao *botaoBomba1,
+                    Botao *botaoBomba2,
                     SensorNivel *sensorNivel)
       : reservatorio(reservatorio),
         bomba1(bomba1),
@@ -247,70 +253,23 @@ public:
         ledVerde(ledVerde),
         ledAmarelo(ledAmarelo),
         chaveSeletora(chaveSeletora),
-        botao1(botao1),
-        botao2(botao2),
+        botaoBomba1(botaoBomba1),
+        botaoBomba2(botaoBomba2),
         sensorNivel(sensorNivel) {}
 
   void atualizar()
   {
     chaveSeletora->atualizar();
-    botao1->atualizar();
-    botao2->atualizar();
+    botaoBomba1->atualizar();
+    botaoBomba2->atualizar();
 
     if (chaveSeletora->estaLigado())
     {
-      // Automatic mode
-
-      reservatorio->setNivel(sensorNivel->lerNivel());
-
-      if (reservatorio->getNivel() < NIVEL_BAIXO)
-      {
-        // Water level is very low - turn on both pumps
-        bomba1->ligar();
-        bomba2->ligar();
-      }
-      else if (reservatorio->getNivel() < NIVEL_MEDIO)
-      {
-        // Water level is below 50% - turn on pump 1 and turn off pump 2
-        bomba1->ligar();
-        bomba2->desligar();
-      }
-      else if (reservatorio->getNivel() < NIVEL_ALTO)
-      {
-        // Water level is between 50% and 75% - turn off both pumps
-        bomba1->desligar();
-        bomba2->desligar();
-      }
-      else
-      {
-        // Water level is above 75% - turn off both pumps
-        bomba1->desligar();
-        bomba2->desligar();
-      }
+      modoAutomatico();
     }
     else
     {
-      // Manual mode
-
-      // Check if button 1 is pressed
-      if (botao1->estaPressionado())
-      {
-        bomba1->ligar();
-      }
-      else
-      {
-        bomba1->desligar();
-      }
-
-      // Check if button 2 is pressed
-      if (botao2->estaPressionado())
-      {
-        bomba2->ligar();
-      }
-      else
-      {
-        bomba2->desligar();
-      }
+      modoManual();
     }
   }
 
@@ -321,28 +280,86 @@ private:
   LED *ledVerde;
   LED *ledAmarelo;
   ChaveSeletora *chaveSeletora;
-  Botao *botao1;
-  Botao *botao2;
+  Botao *botaoBomba1;
+  Botao *botaoBomba2;
   SensorNivel *sensorNivel;
+
+  void modoAutomatico()
+  {
+    reservatorio->setNivel(sensorNivel->lerNivel());
+
+    if (reservatorio->getNivel() < NIVEL_BAIXO)
+    {
+      // Water level is very low - turn on both pumps
+      bomba1->ligar();
+      bomba2->ligar();
+    }
+    else if (reservatorio->getNivel() < NIVEL_MEDIO)
+    {
+      // Water level is below 50% - turn on pump 1 and turn off pump 2
+      bomba1->ligar();
+      bomba2->desligar();
+    }
+    else if (reservatorio->getNivel() < NIVEL_ALTO)
+    {
+      // Water level is between 50% and 75% - turn off both pumps
+      bomba1->desligar();
+      bomba2->desligar();
+    }
+    else
+    {
+      // Water level is above 75% - turn off both pumps
+      bomba1->desligar();
+      bomba2->desligar();
+    }
+
+    ledVerde->ligar();
+  }
+
+  void modoManual()
+  {
+    // Check if button 1 is pressed
+    if (botaoBomba1->estaPressionado())
+    {
+      bomba1->ligar();
+    }
+    else
+    {
+      bomba1->desligar();
+    }
+
+    // Check if button 2 is pressed
+    if (botaoBomba2->estaPressionado())
+    {
+      bomba2->ligar();
+    }
+    else
+    {
+      bomba2->desligar();
+    }
+
+    ledVerde->desligar();
+  }
 };
 
 // Create objects for reservoir, pumps and LEDs
 Reservatorio reservatorio(0);
-Bomba bomba1(BOMBA_1_PIN);
-Bomba bomba2(BOMBA_2_PIN);
+Bomba bomba1(BOMBA_1_PIN, LED_BOMBA_1_PIN);
+Bomba bomba2(BOMBA_2_PIN, LED_BOMBA_2_PIN);
 LED ledVerde(LED_VERDE_PIN);
 LED ledAmarelo(LED_AMARELO_PIN);
 
 // Create objects for buttons and mode selector switch
 ChaveSeletora chaveSeletora(CHAVE_SELETORA_PIN);
-Botao botao1(BOTAO_1_PIN);
-Botao botao2(BOTAO_2_PIN);
+Botao botaoBomba1(BOTAO_BOMBA_1_PIN);
+Botao botaoBomba2(BOTAO_BOMBA_2_PIN);
 
 // Create objects for water level sensors
-const int pinoSensores[] = {9, 10, 11, 12};
+const int pinoSensores[] = {11, 12, 13, 14};
+const int numSensores = sizeof(pinoSensores) / sizeof(pinoSensores[0]);
 // Uncomment one of the following lines to use either digital or analog water level sensors
-SensorNivelDigital sensorNivel(pinoSensores, sizeof(pinoSensores) / sizeof(pinoSensores[0]));
-// SensorNivelAnalogico sensorNivel(SENSOR_ANALOGICO_PIN);
+SensorNivelDigital sensorNivel(pinoSensores, numSensores);
+//SensorNivelAnalogico sensorNivel(SENSOR_ANALOGICO_PIN);
 
 // Create object for control system
 SistemaDeControle sistemaDeControle(&reservatorio,
@@ -351,8 +368,8 @@ SistemaDeControle sistemaDeControle(&reservatorio,
                                     &ledVerde,
                                     &ledAmarelo,
                                     &chaveSeletora,
-                                    &botao1,
-                                    &botao2,
+                                    &botaoBomba1,
+                                    &botaoBomba2,
                                     &sensorNivel);
 
 void setup() {}

@@ -1,6 +1,6 @@
 /**
  * @file Aula Prática 14.ino
- * @brief Aula Prática - CONTROLE DIGITAL E ANALÓGICO DE NÍVEL DE RESERVATÓRIO
+ * @brief Aula Prática 14 - CONTROLE DIGITAL E ANALÓGICO DE NÍVEL DE RESERVATÓRIO
  * @version 1.0
  * @date 2023-06-03
  *

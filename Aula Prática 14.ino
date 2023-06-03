@@ -1,13 +1,37 @@
+/**
+ * @file Aula Prática 14.ino
+ * @brief Aula Prática - CONTROLE DIGITAL E ANALÓGICO DE NÍVEL DE RESERVATÓRIO
+ * @version 1.0
+ * @date 2023-06-03
+ *
+ * A. O controle de nível do reservatório deve ser realizado da seguinte forma:
+ *    Quando o nível estiver em 50% a Bomba 1 deverá ligar até que o reservatório encha completamente.
+ *    Se a Bomba 1 não conseguir manter o nível no reservatório, existe uma bomba de segurança (Bomba 2),
+ *    que deve ser ligada apenas quando o nível estiver muito baixo (abaixo de 25%) e ela deve ser desligada
+ *    somente quando o nível de água atingir 75%.
+ * B. Deverá haver uma chave seletora, com retenção, para definir o modo Automático/Manual.
+ *    Em Automático funcionará conforme descrito acima e, em modo Manual,
+ *    dois botões pulsantes farão o controle de ligarem as bombas, ignorando os sensores de nível,
+ *    ou seja, enquanto o botão 1 estiver pressionado a Bomba 1 deverá ficar ligada e enquanto o Botão 2 estiver pressionado a Bomba 2 deverá ficar ligada.
+ * C. Um LED verde deverá ser usado para sinalização do modo Automático (aceso) / Manual (apagado).
+ * D. Utilize botões/chaves com retenção para simular o acionamento das chaves boia e LEDs vermelhos para as bombas.
+ *    Lembrando que quando o nível estiver em 100% todos as chaves deverão estar acionadas.
+ * E. Se a chave do nível superior for acionada sem que a chave do nível inferior esteja acionada um LED amarelo deverá acender indicando o estado de erro.
+ * F. Após concluída a primeira etapa, faça uma modificação no controle de nível substituindo os sensores digitais por um sensor analógico.
+ *    Utilize um potenciômetro para simular o funcionamento do sensor analógico de nível.
+ */
+
 // Define constants for pin numbers
 const int BOMBA_1_PIN = 2;
+const int LED_BOMBA_1_PIN = 9;
+const int BOTAO_BOMBA_1_PIN = 7;
 const int BOMBA_2_PIN = 3;
+const int LED_BOMBA_2_PIN = 10;
+const int BOTAO_BOMBA_2_PIN = 8;
 const int LED_MODO_AUTOMATICO_PIN = 4;
 const int CHAVE_SELETORA_PIN = 6;
-const int BOTAO_BOMBA_1_PIN = 7;
-const int BOTAO_BOMBA_2_PIN = 8;
 const int SENSOR_ANALOGICO_PIN = A0;
-const int LED_BOMBA_1_PIN = 9;
-const int LED_BOMBA_2_PIN = 10;
+const int LED_ERRO_SENSOR_PIN = 11;
 
 // Define constants for water level thresholds
 const int NIVEL_BAIXO = 25;
@@ -44,38 +68,6 @@ private:
   int nivel;
 };
 
-// Define a class to represent the pump
-class Bomba
-{
-public:
-  // Constructor
-  Bomba(int pin, int ledPin) : pin(pin), ledPin(ledPin)
-  {
-    pinMode(pin, OUTPUT);
-    pinMode(ledPin, OUTPUT);
-    desligar();
-  }
-
-  // Method to turn on the pump
-  void ligar()
-  {
-    digitalWrite(pin, HIGH);
-    digitalWrite(ledPin, HIGH);
-  }
-
-  // Method to turn off the pump
-  void desligar()
-  {
-    digitalWrite(pin, LOW);
-    digitalWrite(ledPin, LOW);
-  }
-
-private:
-  // Pin number
-  int pin;
-  int ledPin;
-};
-
 // Define a class to represent the LED
 class LED
 {
@@ -103,6 +95,37 @@ public:
 private:
   // Pin number
   int pin;
+};
+
+// Define a class to represent the pump
+class Bomba
+{
+public:
+  // Constructor
+  Bomba(int pin, LED *led) : pin(pin), led(led)
+  {
+    pinMode(pin, OUTPUT);
+    desligar();
+  }
+
+  // Method to turn on the pump
+  void ligar()
+  {
+    digitalWrite(pin, HIGH);
+    led->ligar();
+  }
+
+  // Method to turn off the pump
+  void desligar()
+  {
+    digitalWrite(pin, LOW);
+    led->desligar();
+  }
+
+private:
+  // Pin number
+  int pin;
+  LED *led;
 };
 
 // Define a class to represent a button with debounce functionality
@@ -196,42 +219,33 @@ public:
 class SensorNivelDigital : public SensorNivel
 {
 public:
-  SensorNivelDigital(const int *pPinos, int numPinos, int ledPin)
-      : pPinos(pPinos), numPinos(numPinos), ledPin(ledPin)
+  SensorNivelDigital(const int *pPinos, int numPinos, LED *ledErroSensor)
+      : pPinos(pPinos), numPinos(numPinos), ledErroSensor(ledErroSensor)
   {
     for (int i = 0; i < numPinos; i++)
     {
       pinMode(pPinos[i], INPUT_PULLUP);
     }
-    pinMode(ledPin, OUTPUT);
-    digitalWrite(ledPin, LOW);
   }
 
   virtual int lerNivel()
   {
     if (chavesInvalidas())
     {
-      digitalWrite(ledPin, HIGH);
+      ledErroSensor->ligar();
       return 100;
     }
     else
     {
-      digitalWrite(ledPin, LOW);
-      for (int i = 0; i < numPinos; i++)
-      {
-        if (digitalRead(pPinos[i]) == LOW)
-        {
-          return map(i + 1, 1, numPinos, 0, 100);
-        }
-      }
-      return 0;
+      ledErroSensor->desligar();
+      return lerChaves();
     }
   }
 
 private:
   const int *pPinos;
   const int numPinos;
-  const int ledPin;
+  LED *ledErroSensor;
 
   bool chavesInvalidas()
   {
@@ -243,6 +257,19 @@ private:
       }
     }
     return false;
+  }
+
+  int lerChaves()
+  {
+    for (int i = 0; i < numPinos; i++)
+    {
+      if (digitalRead(pPinos[i]) == LOW)
+      {
+        return map(i + 1, 1, numPinos, 0, 100);
+      }
+    }
+
+    return 0;
   }
 };
 
@@ -364,9 +391,12 @@ private:
 
 // Create objects for reservoir, pumps and LEDs
 Reservatorio reservatorio(0);
-Bomba bomba1(BOMBA_1_PIN, LED_BOMBA_1_PIN);
-Bomba bomba2(BOMBA_2_PIN, LED_BOMBA_2_PIN);
+LED ledBomba1(LED_BOMBA_1_PIN);
+LED ledBomba2(LED_BOMBA_2_PIN);
+Bomba bomba1(BOMBA_1_PIN, &ledBomba1);
+Bomba bomba2(BOMBA_2_PIN, &ledBomba2);
 LED ledModoAutomatico(LED_MODO_AUTOMATICO_PIN);
+LED ledErroSensor(LED_ERRO_SENSOR_PIN);
 
 // Create objects for buttons and mode selector switch
 ChaveSeletora chaveSeletora(CHAVE_SELETORA_PIN);
@@ -374,9 +404,9 @@ Botao botaoBomba1(BOTAO_BOMBA_1_PIN);
 Botao botaoBomba2(BOTAO_BOMBA_2_PIN);
 
 // Create objects for water level sensors
-const int pinoSensores[] = {11, 12, 13, 14};
+const int pinoSensores[] = {12, 13, 14, 15};
 const int numSensores = sizeof(pinoSensores) / sizeof(pinoSensores[0]);
-SensorNivelDigital sensorNivel(pinoSensores, numSensores, LED_AMARELO_PIN);
+SensorNivelDigital sensorNivel(pinoSensores, numSensores, &ledErroSensor);
 // SensorNivelAnalogico sensorNivel(SENSOR_ANALOGICO_PIN);
 
 // Create object for control system

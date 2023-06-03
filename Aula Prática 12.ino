@@ -1,11 +1,17 @@
-// Aula Prática 12
-// Um sensor (S1) mede o nível de líquido em um reservatório e retorna uma faixa de valores analógicos que deve ser dividida em 4 níveis.
-// O algoritmo deve controlar a ativação de três bombas (B1, B2 e B3) de acordo com a seguinte tabela:
-//  Nível > 90%: B1 Desligada, B2 Desligada, B3 Desligada;
-//  60% < Nível <= 90%: B1 Ligada, B2 Desligada, B3 Desligada;
-//  20% < Nível <= 60%: B1 Ligada, B2 Ligada, B3 Desligada;
-//  Nível <= 20%: B1 Ligada, B2 Ligada, B3 Ligada.
-// Um potenciômetro deve ser usado para simular o funcionamento do sensor de nível S1 e três LEDs para simular cada bomba respectivamente.
+/**
+ * @file Aula Prática 12.ino
+ * @brief Aula Prática - CONTROLE DE NÍVEL DE RESERVATÓRIO
+ * @version 1.0
+ * @date 2023-06-03
+ *
+ * A. Um sensor (S1) mede o nível de líquido em um reservatório e retorna uma faixa de valores analógicos que deve ser dividida em 4 níveis.
+ * B. O algoritmo deve controlar a ativação de três bombas (B1, B2 e B3) de acordo com a seguinte tabela:
+ *    Nível > 90%: B1 Desligada, B2 Desligada, B3 Desligada;
+ *    60% < Nível <= 90%: B1 Ligada, B2 Desligada, B3 Desligada;
+ *    20% < Nível <= 60%: B1 Ligada, B2 Ligada, B3 Desligada;
+ *    Nível <= 20%: B1 Ligada, B2 Ligada, B3 Ligada.
+ * Um potenciômetro deve ser usado para simular o funcionamento do sensor de nível S1 e três LEDs para simular cada bomba respectivamente.
+ */
 
 class WaterLevelSensor
 {

@@ -1,9 +1,9 @@
 /**
  * @file Aula Prática 13.ino
- * @brief Aula Prática 12 - CONTROLE DE MISTURA LEITE/ESSÊNCIA
+ * @brief Aula Prática 13 - CONTROLE DE MISTURA LEITE/ESSÊNCIA
  * @version 1.0
  * @date 2023-05-26
- * 
+ *
  * A. Ao pulsar o botão LIGA, os volumes dos tanques de Leite e de Essência são memorizados e a Válvula de Leite deverá ser aberta por 5 segundos;
  * B. Em seguida, a Válvula de Essência deverá ser aberta até a mistura atingir a proporção de 1 parte de essência para 10 partes de leite.
  *    Quando o tanque de Essência esvaziar até atingir a proporção adequada, a Válvula de Essência deverá ser fechada.
@@ -412,9 +412,9 @@ public:
 private:
     Button *botaoLiga;    // Pointer to the ON button
     Button *botaoDesliga; // Pointer to the OFF button
+    Controle *controle;   // Pointer to the Controle object
+    bool estado;          // Current state of the system (on or off)
     int pinoLed;
-    Controle *controle; // Pointer to the Controle object
-    bool estado;        // Current state of the system (on or off)
 
     /**
      * @brief Updates the state of the LED according to the system state

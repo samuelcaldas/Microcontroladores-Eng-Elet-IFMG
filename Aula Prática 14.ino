@@ -9,11 +9,8 @@ const int BOTAO_2_PIN = 8;
 const int SENSOR_ANALOGICO_PIN = A0;
 const int SENSOR_DIGITAL_1_PIN = 9;
 const int SENSOR_DIGITAL_2_PIN = 10;
-
-// Define constants for water level thresholds
-const int NIVEL_BAIXO = 25;
-const int NIVEL_MEDIO = 50;
-const int NIVEL_ALTO = 75;
+const int SENSOR_DIGITAL_3_PIN = 11;
+const int SENSOR_DIGITAL_4_PIN = 12;
 
 // Define constants for debounce time
 const unsigned long DEBOUNCE_DELAY = 50;
@@ -169,41 +166,52 @@ class ChaveSeletora : public Botao
 public:
   ChaveSeletora(int pin) : Botao(pin) {}
 
-  bool estaEmModoAutomatico() { return modoAutomatico; }
+  bool estaLigado() { return estado; }
 
 protected:
-  virtual void pressionado() { modoAutomatico = !modoAutomatico; }
+  virtual void pressionado() { estado = !estado; }
 
 private:
-  bool modoAutomatico = true;
+  bool estado = true;
 };
 
 // Define a class to represent a digital water level sensor
 class SensorNivelDigital
 {
 public:
-  SensorNivelDigital(int pin1, int pin2) : pin1(pin1), pin2(pin2)
+  SensorNivelDigital(int pin1, int pin2, int pin3, int pin4)
+      : pin1(pin1), pin2(pin2), pin3(pin3), pin4(pin4)
   {
     pinMode(pin1, INPUT_PULLUP);
     pinMode(pin2, INPUT_PULLUP);
+    pinMode(pin3, INPUT_PULLUP);
+    pinMode(pin4, INPUT_PULLUP);
   }
 
   int lerNivel()
   {
     bool nivelBaixoAcionado = digitalRead(pin1) == LOW;
-    bool nivelAltoAcionado = digitalRead(pin2) == LOW;
+    bool nivelMedioAcionado = digitalRead(pin2) == LOW;
+    bool nivelAltoAcionado = digitalRead(pin3) == LOW;
+    bool nivelMaximoAcionado = digitalRead(pin4) == LOW;
 
-    if (nivelBaixoAcionado && nivelAltoAcionado)
-      return NIVEL_ALTO;
+    if (nivelMaximoAcionado)
+      return 100;
+    else if (nivelAltoAcionado)
+      return 75;
+    else if (nivelMedioAcionado)
+      return 50;
     else if (nivelBaixoAcionado)
-      return NIVEL_MEDIO;
+      return 25;
     else
-      return NIVEL_BAIXO;
+      return 0;
   }
 
 private:
   const int pin1;
   const int pin2;
+  const int pin3;
+  const int pin4;
 };
 
 // Define a class to represent an analog water level sensor
@@ -214,26 +222,27 @@ public:
 
   int lerNivel()
   {
-    return map(analogRead(pin), 0, 1023, NIVEL_BAIXO, NIVEL_ALTO);
+    return map(analogRead(pin), 0, 1023, 0, 100);
   }
 
 private:
   const int pin;
 };
 
-// Define a class to represent the control system using digital water level sensors
-class SistemaDeControleDigital
+// Define a class to represent the control system
+class SistemaDeControle
 {
 public:
-  SistemaDeControleDigital(Reservatorio *reservatorio,
-                           Bomba *bomba1,
-                           Bomba *bomba2,
-                           LED *ledVerde,
-                           LED *ledAmarelo,
-                           ChaveSeletora *chaveSeletora,
-                           Botao *botao1,
-                           Botao *botao2,
-                           SensorNivelDigital *sensorNivel)
+  SistemaDeControle(Reservatorio *reservatorio,
+                    Bomba *bomba1,
+                    Bomba *bomba2,
+                    LED *ledVerde,
+                    LED *ledAmarelo,
+                    ChaveSeletora *chaveSeletora,
+                    Botao *botao1,
+                    Botao *botao2,
+                    SensorNivelDigital *sensorNivelDigital,
+                    SensorNivelAnalogico *sensorNivelAnalogico)
       : reservatorio(reservatorio),
         bomba1(bomba1),
         bomba2(bomba2),
@@ -242,7 +251,8 @@ public:
         chaveSeletora(chaveSeletora),
         botao1(botao1),
         botao2(botao2),
-        sensorNivel(sensorNivel) {}
+        sensorNivelDigital(sensorNivelDigital),
+        sensorNivelAnalogico(sensorNivelAnalogico) {}
 
   void atualizar()
   {
@@ -250,31 +260,44 @@ public:
     botao1->atualizar();
     botao2->atualizar();
 
-    if (chaveSeletora->estaEmModoAutomatico())
+    if (chaveSeletora->estaLigado())
     {
-      reservatorio->setNivel(sensorNivel->lerNivel());
+      // Automatic mode
+
+      // Uncomment one of the following lines to use either digital or analog water level sensors
+      // reservatorio->setNivel(sensorNivelDigital->lerNivel());
+      // reservatorio->setNivel(sensorNivelAnalogico->lerNivel());
 
       if (reservatorio->getNivel() < NIVEL_BAIXO)
       {
+        // Water level is very low - turn on both pumps
         bomba1->ligar();
         bomba2->ligar();
       }
       else if (reservatorio->getNivel() < NIVEL_MEDIO)
       {
+        // Water level is below 50% - turn on pump 1 and turn off pump 2
         bomba1->ligar();
+        bomba2->desligar();
+      }
+      else if (reservatorio->getNivel() < NIVEL_ALTO)
+      {
+        // Water level is between 50% and 75% - turn off both pumps
+        bomba1->desligar();
         bomba2->desligar();
       }
       else
       {
+        // Water level is above 75% - turn off both pumps
         bomba1->desligar();
         bomba2->desligar();
       }
-
-      ledVerde->ligar();
     }
     else
     {
+      // Manual mode
 
+      // Check if button 1 is pressed
       if (botao1->estaPressionado())
       {
         bomba1->ligar();
@@ -284,6 +307,7 @@ public:
         bomba1->desligar();
       }
 
+      // Check if button 2 is pressed
       if (botao2->estaPressionado())
       {
         bomba2->ligar();
@@ -292,243 +316,58 @@ public:
       {
         bomba2->desligar();
       }
-
-      ledVerde->desligar();
     }
   }
 
 private:
   Reservatorio *reservatorio;
-
   Bomba *bomba1;
-
   Bomba *bomba2;
-
   LED *ledVerde;
-
   LED *ledAmarelo;
-
   ChaveSeletora *chaveSeletora;
-
   Botao *botao1;
-
   Botao *botao2;
-
-  SensorNivelDigital *sensorNivel;
-};
-
-// Define a class to represent the control system using an analog water level sensor
-
-class SistemaDeControleAnalogico
-{
-
-public:
-  SistemaDeControleAnalogico(Reservatorio *reservatorio,
-
-                             Bomba *bomba1,
-
-                             Bomba *bomba2,
-
-                             LED *ledVerde,
-
-                             LED *ledAmarelo,
-
-                             ChaveSeletora *chaveSeletora,
-
-                             Botao *botao1,
-
-                             Botao *botao2,
-
-                             SensorNivelAnalogico *sensorNivel)
-
-      : reservatorio(reservatorio),
-
-        bomba1(bomba1),
-
-        bomba2(bomba2),
-
-        ledVerde(ledVerde),
-
-        ledAmarelo(ledAmarelo),
-
-        chaveSeletora(chaveSeletora),
-
-        botao1(botao2),
-
-        botao2(botao2),
-
-        sensorNivel(sensorNivel)
-  {
-  }
-
-  void atualizar()
-  {
-
-    chaveSeletora->atualizar();
-
-    botao1->atualizar();
-
-    botao2->atualizar();
-
-    if (chaveSeletora->estaEmModoAutomatico())
-    {
-
-      reservatorio->setNivel(sensorNivel->lerNivel());
-
-      if (reservatorio->getNivel() < NIVEL_BAIXO)
-      {
-
-        bomba1->ligar();
-
-        bomba2->ligar();
-      }
-      else if (reservatorio->getNivel() < NIVEL_MEDIO)
-      {
-
-        bomba1->ligar();
-
-        bomba2->desligar();
-      }
-      else
-      {
-
-        bomba1->desligar();
-
-        bomba2->desligar();
-      }
-
-      ledVerde->ligar();
-    }
-    else
-    {
-
-      if (botao1->estaPressionado())
-      {
-
-        bomba1->ligar();
-      }
-      else
-      {
-
-        bomba1->desligar();
-      }
-
-      if (botao2->estaPressionado())
-      {
-
-        bomba2->ligar();
-      }
-      else
-      {
-
-        bomba2->desligar();
-      }
-
-      ledVerde->desligar();
-    }
-  }
-
-private:
-  Reservatorio *reservatorio;
-
-  Bomba *bomba1;
-
-  Bomba *bomba2;
-
-  LED *ledVerde;
-
-  LED *ledAmarelo;
-
-  ChaveSeletora *chaveSeletora;
-
-  Botao *botao1;
-
-  Botao *botao2;
-
-  SensorNivelAnalogico *sensorNivel;
+  SensorNivelDigital *sensorNivelDigital;
+  SensorNivelAnalogico *sensorNivelAnalogico;
 };
 
 // Create objects for reservoir, pumps and LEDs
-
 Reservatorio reservatorio(0);
-
 Bomba bomba1(BOMBA_1_PIN);
-
 Bomba bomba2(BOMBA_2_PIN);
-
 LED ledVerde(LED_VERDE_PIN);
-
 LED ledAmarelo(LED_AMARELO_PIN);
 
 // Create objects for buttons and mode selector switch
-
 ChaveSeletora chaveSeletora(CHAVE_SELETORA_PIN);
-
 Botao botao1(BOTAO_1_PIN);
-
 Botao botao2(BOTAO_2_PIN);
 
 // Create objects for water level sensors
-
-SensorNivelDigital sensorNivelDigital(SENSOR_DIGITAL_1_PIN, SENSOR_DIGITAL_2_PIN);
-
+SensorNivelDigital sensorNivelDigital(SENSOR_DIGITAL_1_PIN, SENSOR_DIGITAL_2_PIN, SENSOR_DIGITAL_3_PIN, SENSOR_DIGITAL_4_PIN);
 SensorNivelAnalogico sensorNivelAnalogico(SENSOR_ANALOGICO_PIN);
 
-// Create object for control system using digital water level sensors
-
-SistemaDeControleDigital sistemaDeControleDigital(&reservatorio,
-
-                                                  &bomba1,
-
-                                                  &bomba2,
-
-                                                  &ledVerde,
-
-                                                  &ledAmarelo,
-
-                                                  &chaveSeletora,
-
-                                                  &botao1,
-
-                                                  &botao2,
-
-                                                  &sensorNivelDigital);
-
-// Create object for control system using an analog water level sensor
-
-SistemaDeControleAnalogico sistemaDeControleAnalogico(&reservatorio,
-
-                                                      &bomba1,
-
-                                                      &bomba2,
-
-                                                      &ledVerde,
-
-                                                      &ledAmarelo,
-
-                                                      &chaveSeletora,
-
-                                                      &botao1,
-
-                                                      &botao2,
-
-                                                      &sensorNivelAnalogico);
+// Create object for control system
+SistemaDeControle sistemaDeControle(&reservatorio,
+                                    &bomba1,
+                                    &bomba2,
+                                    &ledVerde,
+                                    &ledAmarelo,
+                                    &chaveSeletora,
+                                    &botao1,
+                                    &botao2,
+                                    &sensorNivelDigital,
+                                    &sensorNivelAnalogico);
 
 void setup() {}
 
 void loop()
 {
-
-  // Uncomment one of the following lines to use either digital or analog water level sensors
-
-  // sistemaDeControleDigital.atualizar();
-
-  // sistemaDeControleAnalogico.atualizar();
+  sistemaDeControle.atualizar();
 
   // Use millis() instead of delay()
-
   unsigned long currentMillis = millis();
-
   while (millis() - currentMillis < 100)
   {
   }

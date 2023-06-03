@@ -41,23 +41,37 @@ const int NIVEL_ALTO = 75;
 // Define constants for debounce time
 const unsigned long DEBOUNCE_DELAY = 50;
 
-// Define a class to represent the reservoir
+/**
+ * @class Reservatorio
+ * @brief Represents a water reservoir.
+ *
+ * This class provides methods to set and get the water level of the reservoir.
+ */
 class Reservatorio
 {
 public:
-  // Constructor
+  /**
+   * @brief Constructor for the Reservatorio class.
+   * @param nivel The initial water level of the reservoir.
+   */
   Reservatorio(int nivel)
   {
     this->nivel = nivel;
   }
 
-  // Method to set the water level
+  /**
+   * @brief Sets the water level of the reservoir.
+   * @param nivel The new water level of the reservoir.
+   */
   void setNivel(int nivel)
   {
     this->nivel = nivel;
   }
 
-  // Method to get the water level
+  /**
+   * @brief Gets the current water level of the reservoir.
+   * @return The current water level of the reservoir.
+   */
   int getNivel()
   {
     return this->nivel;
@@ -68,11 +82,19 @@ private:
   int nivel;
 };
 
-// Define a class to represent the LED
+/**
+ * @class LED
+ * @brief Represents an LED.
+ *
+ * This class provides methods to turn on and off the LED.
+ */
 class LED
 {
 public:
-  // Constructor
+  /**
+   * @brief Constructor for the LED class.
+   * @param pin The pin number of the LED.
+   */
   LED(int pin)
   {
     this->pin = pin;
@@ -80,13 +102,17 @@ public:
     desligar();
   }
 
-  // Method to turn on the LED
+  /**
+   * @brief Turns on the LED.
+   */
   void ligar()
   {
     digitalWrite(pin, HIGH);
   }
 
-  // Method to turn off the LED
+  /**
+   * @brief Turns off the LED.
+   */
   void desligar()
   {
     digitalWrite(pin, LOW);
@@ -97,25 +123,38 @@ private:
   int pin;
 };
 
-// Define a class to represent the pump
+/**
+ * @class Bomba
+ * @brief Represents a pump.
+ *
+ * This class provides methods to turn on and off the pump.
+ */
 class Bomba
 {
 public:
-  // Constructor
+  /**
+   * @brief Constructor for the Bomba class.
+   * @param pin The pin number of the pump.
+   * @param led A pointer to an LED object that is associated with the pump.
+   */
   Bomba(int pin, LED *led) : pin(pin), led(led)
   {
     pinMode(pin, OUTPUT);
     desligar();
   }
 
-  // Method to turn on the pump
+  /**
+   * @brief Turns on the pump.
+   */
   void ligar()
   {
     digitalWrite(pin, HIGH);
     led->ligar();
   }
 
-  // Method to turn off the pump
+  /**
+   * @brief Turns off the pump.
+   */
   void desligar()
   {
     digitalWrite(pin, LOW);
@@ -125,14 +164,23 @@ public:
 private:
   // Pin number
   int pin;
+  // Pointer to an LED object
   LED *led;
 };
 
-// Define a class to represent a button with debounce functionality
+/**
+ * @class Botao
+ * @brief Represents a button with debounce functionality.
+ *
+ * This class provides methods to check if the button is pressed with debounce functionality.
+ */
 class Botao
 {
 public:
-  // Constructor
+  /**
+   * @brief Constructor for the Botao class.
+   * @param pin The pin number of the button.
+   */
   Botao(int pin)
   {
     this->pin = pin;
@@ -143,7 +191,10 @@ public:
     ultimoTempoMudancaEstado = 0;
   }
 
-  // Method to check if the button is pressed
+  /**
+   * @brief Checks if the button is pressed.
+   * @return True if the button is pressed, false otherwise.
+   */
   bool estaPressionado()
   {
     atualizar();
@@ -151,6 +202,9 @@ public:
   }
 
 protected:
+  /**
+   * @brief Virtual method to be called when the button is pressed.
+   */
   virtual void pressionado() {}
 
 private:
@@ -162,7 +216,9 @@ private:
   int ultimoEstadoBotao;
   unsigned long ultimoTempoMudancaEstado;
 
-  // Method to update the button state with debounce
+  /**
+   * @brief Method to update the button state with debounce.
+   */
   void atualizar()
   {
     int leitura = digitalRead(pin);
@@ -189,12 +245,25 @@ private:
   }
 };
 
-// Define a class to represent the mode selector switch with debounce functionality
+/**
+ * @class ChaveSeletora
+ * @brief Represents a mode selector switch with debounce functionality.
+ *
+ * This class provides methods to check if the switch is turned on with debounce functionality.
+ */
 class ChaveSeletora : public Botao
 {
 public:
+  /**
+   * @brief Constructor for the ChaveSeletora class.
+   * @param pin The pin number of the switch.
+   */
   ChaveSeletora(int pin) : Botao(pin) {}
 
+  /**
+   * @brief Checks if the switch is turned on.
+   * @return True if the switch is turned on, false otherwise.
+   */
   bool estaLigado()
   {
     atualizar();
@@ -202,23 +271,46 @@ public:
   }
 
 protected:
+  /**
+   * @brief Virtual method to be called when the switch is pressed.
+   */
   virtual void pressionado() { estado = !estado; }
 
 private:
   bool estado = true;
 };
 
-// Define an interface for water level sensors
+/**
+ * @class SensorNivel
+ * @brief An interface for water level sensors.
+ *
+ * This class provides an interface for reading the water level from a sensor.
+ */
 class SensorNivel
 {
 public:
+  /**
+   * @brief Virtual method to read the water level from the sensor.
+   * @return An integer representing the water level read from the sensor.
+   */
   virtual int lerNivel() = 0;
 };
 
-// Define a class to represent a digital water level sensor
+/**
+ * @class SensorNivelDigital
+ * @brief Represents a digital water level sensor.
+ *
+ * This class provides methods to read the water level from a digital sensor.
+ */
 class SensorNivelDigital : public SensorNivel
 {
 public:
+  /**
+   * @brief Constructor for the SensorNivelDigital class.
+   * @param pPinos An array of integers representing the pins of the digital sensor.
+   * @param numPinos The number of pins in the array.
+   * @param ledErroSensor A pointer to an LED object that will be used to indicate errors.
+   */
   SensorNivelDigital(const int *pPinos, int numPinos, LED *ledErroSensor)
       : pPinos(pPinos), numPinos(numPinos), ledErroSensor(ledErroSensor)
   {
@@ -228,6 +320,10 @@ public:
     }
   }
 
+  /**
+   * @brief Virtual method to read the water level from the digital sensor.
+   * @return An integer representing the water level read from the sensor.
+   */
   virtual int lerNivel()
   {
     if (chavesInvalidas())
@@ -247,6 +343,10 @@ private:
   const int numPinos;
   LED *ledErroSensor;
 
+  /**
+   * @brief Method to check if the digital sensor is in an invalid state.
+   * @return True if the sensor is in an invalid state, false otherwise.
+   */
   bool chavesInvalidas()
   {
     for (int i = numPinos - 1; i >= 1; i--)
@@ -259,6 +359,10 @@ private:
     return false;
   }
 
+  /**
+   * @brief Method to read the water level from the digital sensor.
+   * @return An integer representing the water level read from the sensor.
+   */
   int lerChaves()
   {
     for (int i = 0; i < numPinos; i++)
@@ -273,12 +377,25 @@ private:
   }
 };
 
-// Define a class to represent an analog water level sensor
+/**
+ * @class SensorNivelAnalogico
+ * @brief Represents an analog water level sensor.
+ *
+ * This class provides methods to read the water level from an analog sensor.
+ */
 class SensorNivelAnalogico : public SensorNivel
 {
 public:
+  /**
+   * @brief Constructor for the SensorNivelAnalogico class.
+   * @param pin An integer representing the pin of the analog sensor.
+   */
   SensorNivelAnalogico(int pin) : pin(pin) {}
 
+  /**
+   * @brief Virtual method to read the water level from the analog sensor.
+   * @return An integer representing the water level read from the sensor.
+   */
   virtual int lerNivel()
   {
     return map(analogRead(pin), 0, 1023, 0, 100);
@@ -288,10 +405,26 @@ private:
   const int pin;
 };
 
-// Define a class to represent the control system
+/**
+ * @class SistemaDeControle
+ * @brief Represents a control system for water pumps and reservoir.
+ *
+ * This class provides methods to control the water pumps and reservoir based on the water level read from a sensor.
+ */
 class SistemaDeControle
 {
 public:
+  /**
+   * @brief Constructor for the SistemaDeControle class.
+   * @param reservatorio A pointer to a Reservatorio object.
+   * @param bomba1 A pointer to a Bomba object representing pump 1.
+   * @param bomba2 A pointer to a Bomba object representing pump 2.
+   * @param ledModoAutomatico A pointer to an LED object that will be used to indicate automatic mode.
+   * @param chaveSeletora A pointer to a ChaveSeletora object representing the mode selector switch.
+   * @param botaoBomba1 A pointer to a Botao object representing button 1 for manual mode.
+   * @param botaoBomba2 A pointer to a Botao object representing button 2 for manual mode.
+   * @param sensorNivel A pointer to a SensorNivel object representing the water level sensor.
+   */
   SistemaDeControle(Reservatorio *reservatorio,
                     Bomba *bomba1,
                     Bomba *bomba2,
@@ -309,6 +442,11 @@ public:
         botaoBomba2(botaoBomba2),
         sensorNivel(sensorNivel) {}
 
+  /**
+   * @brief Method to update the control system.
+   *
+   * This method checks the mode selector switch and updates the water pumps and reservoir accordingly.
+   */
   void atualizar()
   {
     if (chaveSeletora->estaLigado())
@@ -331,6 +469,11 @@ private:
   Botao *botaoBomba2;
   SensorNivel *sensorNivel;
 
+  /**
+   * @brief Method to control the system in automatic mode.
+   *
+   * This method reads the water level from the sensor and turns on/off the pumps accordingly.
+   */
   void modoAutomatico()
   {
     reservatorio->setNivel(sensorNivel->lerNivel());
@@ -363,6 +506,11 @@ private:
     ledModoAutomatico->ligar();
   }
 
+  /**
+   * @brief Method to control the system in manual mode.
+   *
+   * This method reads the state of the manual mode buttons and turns on/off the pumps accordingly.
+   */
   void modoManual()
   {
     // Check if button 1 is pressed
@@ -431,3 +579,8 @@ void loop()
   {
   }
 }
+
+/* Nesta atividade prática, aplicamos os conhecimentos teóricos adquiridos durante a disciplina de Microcontroladores para programar e montar um sistema de controle de nível de reservatório utilizando a plataforma Arduino. O sistema foi projetado para controlar o nível de água em um reservatório utilizando duas bombas e sensores de nível digital ou analógico. O sistema pode operar em modo automático ou manual, selecionado por meio de uma chave seletora.
+No modo automático, o sistema controla o nível de água no reservatório ligando e desligando as bombas com base nas leituras dos sensores de nível. No modo manual, o usuário pode controlar as bombas diretamente por meio de botões.
+Durante a atividade, refatoramos o código para melhorar sua legibilidade e modularidade. Criamos classes para representar os componentes do sistema, como o reservatório, as bombas, os LEDs e os sensores de nível. Também criamos uma classe para representar o sistema de controle e implementamos métodos para os modos automático e manual.
+Em resumo, esta atividade prática nos permitiu aplicar nossos conhecimentos teóricos em um projeto concreto e desenvolver habilidades práticas na programação e montagem de sistemas microcontrolados. Aprendemos como projetar e implementar um sistema de controle utilizando a plataforma Arduino e como refatorar o código para melhorar sua legibilidade e modularidade. A atividade foi desafiadora e gratificante, e estamos satisfeitos com os resultados alcançados. */

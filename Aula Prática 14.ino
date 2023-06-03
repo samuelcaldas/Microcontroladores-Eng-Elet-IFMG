@@ -1,8 +1,7 @@
 // Define constants for pin numbers
 const int BOMBA_1_PIN = 2;
 const int BOMBA_2_PIN = 3;
-const int LED_VERDE_PIN = 4;
-const int LED_AMARELO_PIN = 5;
+const int LED_MODO_AUTOMATICO_PIN = 4;
 const int CHAVE_SELETORA_PIN = 6;
 const int BOTAO_BOMBA_1_PIN = 7;
 const int BOTAO_BOMBA_2_PIN = 8;
@@ -16,7 +15,6 @@ const int NIVEL_MEDIO = 50;
 const int NIVEL_ALTO = 75;
 
 // Define constants for debounce time
-
 const unsigned long DEBOUNCE_DELAY = 50;
 
 // Define a class to represent the reservoir
@@ -122,6 +120,25 @@ public:
     ultimoTempoMudancaEstado = 0;
   }
 
+  // Method to check if the button is pressed
+  bool estaPressionado()
+  {
+    atualizar();
+    return (estadoBotao == LOW);
+  }
+
+protected:
+  virtual void pressionado() {}
+
+private:
+  // Pin number
+  int pin;
+
+  // Button state variables for debounce functionality
+  int estadoBotao;
+  int ultimoEstadoBotao;
+  unsigned long ultimoTempoMudancaEstado;
+
   // Method to update the button state with debounce
   void atualizar()
   {
@@ -147,24 +164,6 @@ public:
 
     ultimoEstadoBotao = leitura;
   }
-
-  // Method to check if the button is pressed
-  bool estaPressionado()
-  {
-    return (estadoBotao == LOW);
-  }
-
-protected:
-  virtual void pressionado() {}
-
-private:
-  // Pin number
-  int pin;
-
-  // Button state variables for debounce functionality
-  int estadoBotao;
-  int ultimoEstadoBotao;
-  unsigned long ultimoTempoMudancaEstado;
 };
 
 // Define a class to represent the mode selector switch with debounce functionality
@@ -173,7 +172,11 @@ class ChaveSeletora : public Botao
 public:
   ChaveSeletora(int pin) : Botao(pin) {}
 
-  bool estaLigado() { return estado; }
+  bool estaLigado()
+  {
+    atualizar();
+    return estado;
+  }
 
 protected:
   virtual void pressionado() { estado = !estado; }
@@ -193,30 +196,54 @@ public:
 class SensorNivelDigital : public SensorNivel
 {
 public:
-  SensorNivelDigital(const int *pPinos, int numPinos)
-      : pPinos(pPinos), numPinos(numPinos)
+  SensorNivelDigital(const int *pPinos, int numPinos, int ledPin)
+      : pPinos(pPinos), numPinos(numPinos), ledPin(ledPin)
   {
     for (int i = 0; i < numPinos; i++)
     {
       pinMode(pPinos[i], INPUT_PULLUP);
     }
+    pinMode(ledPin, OUTPUT);
+    digitalWrite(ledPin, LOW);
   }
 
   virtual int lerNivel()
   {
-    for (int i = 0; i < numPinos; i++)
+    if (chavesInvalidas())
     {
-      if (digitalRead(pPinos[i]) == LOW)
-      {
-        return map(i + 1, 1, numPinos, 0, 100);
-      }
+      digitalWrite(ledPin, HIGH);
+      return 100;
     }
-    return 0;
+    else
+    {
+      digitalWrite(ledPin, LOW);
+      for (int i = 0; i < numPinos; i++)
+      {
+        if (digitalRead(pPinos[i]) == LOW)
+        {
+          return map(i + 1, 1, numPinos, 0, 100);
+        }
+      }
+      return 0;
+    }
   }
 
 private:
   const int *pPinos;
   const int numPinos;
+  const int ledPin;
+
+  bool chavesInvalidas()
+  {
+    for (int i = numPinos - 1; i >= 1; i--)
+    {
+      if (digitalRead(pPinos[i]) == LOW && digitalRead(pPinos[i - 1]) == HIGH)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
 };
 
 // Define a class to represent an analog water level sensor
@@ -241,8 +268,7 @@ public:
   SistemaDeControle(Reservatorio *reservatorio,
                     Bomba *bomba1,
                     Bomba *bomba2,
-                    LED *ledVerde,
-                    LED *ledAmarelo,
+                    LED *ledModoAutomatico,
                     ChaveSeletora *chaveSeletora,
                     Botao *botaoBomba1,
                     Botao *botaoBomba2,
@@ -250,8 +276,7 @@ public:
       : reservatorio(reservatorio),
         bomba1(bomba1),
         bomba2(bomba2),
-        ledVerde(ledVerde),
-        ledAmarelo(ledAmarelo),
+        ledModoAutomatico(ledModoAutomatico),
         chaveSeletora(chaveSeletora),
         botaoBomba1(botaoBomba1),
         botaoBomba2(botaoBomba2),
@@ -259,10 +284,6 @@ public:
 
   void atualizar()
   {
-    chaveSeletora->atualizar();
-    botaoBomba1->atualizar();
-    botaoBomba2->atualizar();
-
     if (chaveSeletora->estaLigado())
     {
       modoAutomatico();
@@ -277,8 +298,7 @@ private:
   Reservatorio *reservatorio;
   Bomba *bomba1;
   Bomba *bomba2;
-  LED *ledVerde;
-  LED *ledAmarelo;
+  LED *ledModoAutomatico;
   ChaveSeletora *chaveSeletora;
   Botao *botaoBomba1;
   Botao *botaoBomba2;
@@ -313,7 +333,7 @@ private:
       bomba2->desligar();
     }
 
-    ledVerde->ligar();
+    ledModoAutomatico->ligar();
   }
 
   void modoManual()
@@ -338,7 +358,7 @@ private:
       bomba2->desligar();
     }
 
-    ledVerde->desligar();
+    ledModoAutomatico->desligar();
   }
 };
 
@@ -346,8 +366,7 @@ private:
 Reservatorio reservatorio(0);
 Bomba bomba1(BOMBA_1_PIN, LED_BOMBA_1_PIN);
 Bomba bomba2(BOMBA_2_PIN, LED_BOMBA_2_PIN);
-LED ledVerde(LED_VERDE_PIN);
-LED ledAmarelo(LED_AMARELO_PIN);
+LED ledModoAutomatico(LED_MODO_AUTOMATICO_PIN);
 
 // Create objects for buttons and mode selector switch
 ChaveSeletora chaveSeletora(CHAVE_SELETORA_PIN);
@@ -357,16 +376,14 @@ Botao botaoBomba2(BOTAO_BOMBA_2_PIN);
 // Create objects for water level sensors
 const int pinoSensores[] = {11, 12, 13, 14};
 const int numSensores = sizeof(pinoSensores) / sizeof(pinoSensores[0]);
-// Uncomment one of the following lines to use either digital or analog water level sensors
-SensorNivelDigital sensorNivel(pinoSensores, numSensores);
-//SensorNivelAnalogico sensorNivel(SENSOR_ANALOGICO_PIN);
+SensorNivelDigital sensorNivel(pinoSensores, numSensores, LED_AMARELO_PIN);
+// SensorNivelAnalogico sensorNivel(SENSOR_ANALOGICO_PIN);
 
 // Create object for control system
 SistemaDeControle sistemaDeControle(&reservatorio,
                                     &bomba1,
                                     &bomba2,
-                                    &ledVerde,
-                                    &ledAmarelo,
+                                    &ledModoAutomatico,
                                     &chaveSeletora,
                                     &botaoBomba1,
                                     &botaoBomba2,

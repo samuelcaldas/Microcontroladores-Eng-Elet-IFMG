@@ -1,4 +1,11 @@
-// Aula Prática 11 - Medição de distâncias através de ultrassom com o sensor HC-SR04
+/**
+ * @file Aula Prática 11.ino
+ * @brief Aula Prática 11 - Medição de distâncias através de ultrassom com o sensor HC-SR04
+ * @version 1.0
+ * @date 2023-06-03
+ *
+ * Este algoritmo mede a distância usando o sensor HC-SR04 e exibe o resultado no monitor serial.
+ */
 
 #include <Ultrasonic.h>
 

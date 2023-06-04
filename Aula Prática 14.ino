@@ -170,70 +170,80 @@ private:
 };
 
 /**
- * @class Botao
- * @brief Represents a button with debounce functionality.
+ * @class Switch
+ * @brief Represents a switch with debounce functionality.
  *
- * This class provides methods to check if the button is pressed with debounce functionality.
+ * This class provides methods to check if the switch is on or off, and also provides
+ * functionality to debounce the switch to prevent false readings.
  */
-class Botao
+class Switch
 {
 public:
   /**
-   * @brief Constructor for the Botao class.
-   * @param pin The pin number of the button.
+   * @brief Constructor for the Switch class.
+   * @param pin The pin number of the switch.
+   * @param debounceDelay The debounce delay in milliseconds.
    */
-  Botao(int pin)
+  Switch(int pin, unsigned long debounceDelay) : pin(pin), debounceDelay(debounceDelay)
   {
-    this->pin = pin;
     pinMode(pin, INPUT_PULLUP);
 
-    estadoBotao = digitalRead(pin);
-    ultimoEstadoBotao = estadoBotao;
+    estadoSwitch = digitalRead(pin);
+    ultimoEstadoSwitch = estadoSwitch;
     ultimoTempoMudancaEstado = 0;
   }
 
   /**
-   * @brief Checks if the button is pressed.
-   * @return True if the button is pressed, false otherwise.
+   * @brief Checks if the switch is on.
+   * @return True if the switch is on, false otherwise.
    */
-  bool estaPressionado()
+  bool estaLigado()
   {
     atualizar();
-    return (estadoBotao == LOW);
+    return estadoSwitch;
   }
 
 protected:
   /**
-   * @brief Virtual method to be called when the button is pressed.
+   * @brief Virtual method to be called when the switch is turned on.
    */
-  virtual void pressionado() {}
+  virtual void ligado() {}
 
   /**
-   * @brief Method to update the button state with debounce.
+   * @brief Virtual method to be called when the switch is turned off.
+   */
+  virtual void desligado() {}
+
+  /**
+   * @brief Updates the switch state and debounce functionality.
    */
   void atualizar()
   {
     int leitura = digitalRead(pin);
 
-    if (leitura != ultimoEstadoBotao)
+    if (leitura != ultimoEstadoSwitch)
     {
       ultimoTempoMudancaEstado = millis();
     }
 
-    if ((millis() - ultimoTempoMudancaEstado) > DEBOUNCE_DELAY)
+    if ((millis() - ultimoTempoMudancaEstado) > debounceDelay)
     {
-      if (leitura != estadoBotao)
+      if (leitura != estadoSwitch)
       {
-        estadoBotao = leitura;
+        estadoSwitch = leitura;
 
-        if (estadoBotao == LOW)
+        if (estadoSwitch == LOW)
         {
-          pressionado();
+          ligado();
+        }
+        else
+        {
+          desligado();
         }
       }
     }
 
-    ultimoEstadoBotao = leitura;
+    ultimoEstadoSwitch = leitura;
   }
 
 private:
@@ -241,44 +251,74 @@ private:
   int pin;
 
   // Button state variables for debounce functionality
-  int estadoBotao;
-  int ultimoEstadoBotao;
+  unsigned long debounceDelay;
+  int estadoSwitch;
+  int ultimoEstadoSwitch;
   unsigned long ultimoTempoMudancaEstado;
 };
 
 /**
- * @class ChaveSeletora
- * @brief Represents a mode selector switch with debounce functionality.
+ * @class Botao
+ * @brief A class for a button switch that inherits from the Switch class.
  *
- * This class provides methods to check if the switch is turned on with debounce functionality.
+ * This class provides functionality for a button switch that inherits from the Switch class.
  */
-class ChaveSeletora : public Botao
+class Botao : public Switch
+{
+public:
+  Botao(int pin, unsigned long debounceDelay) : Switch(pin, debounceDelay) {}
+};
+
+/**
+ * @class ChaveSeletora
+ * @brief A class for a selector switch that controls an LED.
+ *
+ * This class provides functionality for a selector switch that controls an LED. It inherits from the Switch class.
+ */
+class ChaveSeletora : public Switch
 {
 public:
   /**
    * @brief Constructor for the ChaveSeletora class.
    * @param pin The pin number of the switch.
+   * @param debounceDelay The debounce delay in milliseconds.
+   * @param led A pointer to the LED object that the switch controls.
    */
-  ChaveSeletora(int pin) : Botao(pin) {}
-
-  /**
-   * @brief Checks if the switch is turned on.
-   * @return True if the switch is turned on, false otherwise.
-   */
-  bool estaLigado()
-  {
-    atualizar();
-    return estado;
-  }
+  ChaveSeletora(int pin, unsigned long debounceDelay, LED *led) : Switch(pin, debounceDelay), led(led) {}
 
 protected:
   /**
-   * @brief Virtual method to be called when the switch is pressed.
+   * @brief Virtual method to be called when the switch is turned on.
+   * @details This method turns on the LED.
    */
-  virtual void pressionado() { estado = !estado; }
+  virtual void ligado()
+  {
+    led->ligar();
+  }
+
+  /**
+   * @brief Virtual method to be called when the switch is turned off.
+   * @details This method turns off the LED.
+   */
+  virtual void desligado()
+  {
+    led->desligar();
+  }
 
 private:
-  bool estado = true;
+  LED *led; /**< A pointer to the LED object that the switch controls. */
+};
+
+/**
+ * @class ChaveBoia
+ * @brief A class for a water level switch.
+ *
+ * This class provides functionality for a water level switch. It inherits from the Switch class.
+ */
+class ChaveBoia : public Switch
+{
+public:
+  ChaveBoia(int pin, unsigned long debounceDelay) : Switch(pin, debounceDelay) {}
 };
 
 /**
@@ -515,7 +555,7 @@ private:
   void modoManual()
   {
     // Check if button 1 is pressed
-    if (botaoBomba1->estaPressionado())
+    if (botaoBomba1->estaLigado())
     {
       bomba1->ligar();
     }
@@ -525,7 +565,7 @@ private:
     }
 
     // Check if button 2 is pressed
-    if (botaoBomba2->estaPressionado())
+    if (botaoBomba2->estaLigado())
     {
       bomba2->ligar();
     }

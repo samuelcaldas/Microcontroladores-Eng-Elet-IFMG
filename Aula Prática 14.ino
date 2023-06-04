@@ -350,15 +350,16 @@ public:
    * @brief Constructor for the SensorNivelDigital class.
    * @param pPinos An array of integers representing the pins of the digital sensor.
    * @param numPinos The number of pins in the array.
+   * @param debounceDelay The debounce delay in milliseconds.
    * @param ledErroSensor A pointer to an LED object that will be used to indicate errors.
    */
   SensorNivelDigital(const int *pPinos, int numPinos, unsigned long debounceDelay, LED *ledErroSensor)
       : pPinos(pPinos), numPinos(numPinos), debounceDelay(debounceDelay), ledErroSensor(ledErroSensor)
   {
-    chavesBoia = new ChaveBoia[numPinos];
+    chavesBoia = new ChaveBoia *[numPinos];
     for (int i = 0; i < numPinos; i++)
     {
-      chavesBoia[i] = ChaveBoia(pPinos[i], debounceDelay);
+      chavesBoia[i] = new ChaveBoia(pPinos[i], debounceDelay);
     }
   }
 
@@ -384,7 +385,7 @@ private:
   const int *pPinos;
   const int numPinos;
   LED *ledErroSensor;
-  ChaveBoia *chavesBoia;
+  ChaveBoia **chavesBoia;
   unsigned long debounceDelay;
 
   /**
@@ -395,7 +396,7 @@ private:
   {
     for (int i = numPinos - 1; i >= 1; i--)
     {
-      if (!chavesBoia[i].estaLigado() && chavesBoia[i - 1].estaLigado())
+      if (!chavesBoia[i]->estaLigado() && chavesBoia[i - 1]->estaLigado())
       {
         return true;
       }
@@ -411,7 +412,7 @@ private:
   {
     for (int i = 0; i < numPinos; i++)
     {
-      if (!chavesBoia[i].estaLigado())
+      if (!chavesBoia[i]->estaLigado())
       {
         return map(i + 1, 1, numPinos, 0, 100);
       }

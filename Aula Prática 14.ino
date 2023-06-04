@@ -352,13 +352,13 @@ public:
    * @param numPinos The number of pins in the array.
    * @param ledErroSensor A pointer to an LED object that will be used to indicate errors.
    */
-  SensorNivelDigital(const int *pPinos, int numPinos, LED *ledErroSensor)
-    : pPinos(pPinos), numPinos(numPinos), ledErroSensor(ledErroSensor)
+  SensorNivelDigital(const int *pPinos, int numPinos, unsigned long debounceDelay, LED *ledErroSensor)
+      : pPinos(pPinos), numPinos(numPinos), debounceDelay(debounceDelay), ledErroSensor(ledErroSensor)
   {
     chavesBoia = new ChaveBoia[numPinos];
     for (int i = 0; i < numPinos; i++)
     {
-      chavesBoia[i] = ChaveBoia(pPinos[i], DEBOUNCE_DELAY);
+      chavesBoia[i] = ChaveBoia(pPinos[i], debounceDelay);
     }
   }
 
@@ -385,6 +385,7 @@ private:
   const int numPinos;
   LED *ledErroSensor;
   ChaveBoia *chavesBoia;
+  unsigned long debounceDelay;
 
   /**
    * @brief Method to check if the digital sensor is in an invalid state.

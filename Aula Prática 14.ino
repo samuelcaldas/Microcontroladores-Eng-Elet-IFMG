@@ -591,7 +591,7 @@ Botao botaoBomba2(BOTAO_BOMBA_2_PIN, DEBOUNCE_DELAY);
 
 // Create objects for water level sensors
 const int numSensores = sizeof(SENSOR_DIGITAL_PINS) / sizeof(SENSOR_DIGITAL_PINS[0]);
-SensorNivelDigital sensorNivel(SENSOR_DIGITAL_PINS, numSensores, &ledErroSensor);
+SensorNivelDigital sensorNivel(SENSOR_DIGITAL_PINS, numSensores, DEBOUNCE_DELAY, &ledErroSensor);
 // SensorNivelAnalogico sensorNivel(SENSOR_ANALOGICO_PIN);
 
 // Create object for control system

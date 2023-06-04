@@ -1,9 +1,13 @@
-// Aula Prática 3 - Programa 1
-// - Desenvolva uma lógica em que um LED varie seu brilho automaticamente
-//   com 51 niveis diferentes com intervalo de 100ms.
-// - Quando chegar ao máximo, deve ir para o mínimo em processo inverso.
-// - Adicione mais 3 LEDs, um para indicar o brilho mínimo (<10%), outro para
-//   indicar o médio (45 a 55%), e o último para indicar o máximo (>90%).
+/**
+ * @file Aula Prática 3 - Programa 1.ino
+ * @brief Aula Prática 3 - Programação e Montagem de Hardware na Plataforma Arduino
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de uma lógica em que um LED varie seu brilho automaticamente com 51 niveis diferentes com intervalo de 100ms.
+ * B. Quando chegar ao máximo, deve ir para o mínimo em processo inverso.
+ * C. Adicione mais 3 LEDs, um para indicar o brilho mínimo (<10%), outro para indicar o médio (45 a 55%), e o último para indicar o máximo (>90%).
+ */
 
 // Definir os pinos dos LEDs
 #define LED_PIN 9

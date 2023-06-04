@@ -1,6 +1,13 @@
-// Aula Prática 2 - Programa 5
-// - Pressionando 3 vezes o botão b0, acende os leds L1 e L2 se mantendo acesos.
-// - Pressionando o botão b1, apaga todos os leds com o circuito voltando as condições iniciais.
+/**
+ * @file Aula Prática 2 - Programa 5.ino
+ * @brief Aula Prática 2 - Programação e Montagem de Hardware na Plataforma Arduino
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de uma lógica aplicada em um circuito com dois botões e dois LEDs.
+ * B. Pressionando 3 vezes o botão b0, acende os leds L1 e L2 se mantendo acesos.
+ * C. Pressionando o botão b1, apaga todos os leds com o circuito voltando as condições iniciais.
+ */
 
 // Pinos do Arduino
 int b0 = 2;  // Pino do botão b0

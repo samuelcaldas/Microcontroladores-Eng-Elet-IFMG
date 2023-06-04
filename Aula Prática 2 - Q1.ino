@@ -1,6 +1,13 @@
-// Aula Prática 2 - Programa 1
-// - Pressionando b0 liga o LED L1.
-// - Liberando o acionamento de b0 desliga o LED L1.
+/**
+ * @file Aula Prática 2 - Programa 1.ino
+ * @brief Aula Prática 2 - Programação e Montagem de Hardware na Plataforma Arduino
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de uma lógica aplicada em um circuito com um botão e um LED.
+ * B. Pressionando b0 liga o LED L1.
+ * C. Liberando o acionamento de b0 desliga o LED L1.
+ */
 
 // Pinos do Arduino
 int b0 = 2;  // Pino do botão b0

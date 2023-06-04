@@ -1,9 +1,16 @@
-// Aula Prática 2 - Programa 4
-// - Pressionando os botões b0 E b1 simultaneamente, acendem os LEDs L1 e L2.
-// - Liberando o acionamento dos botões, os leds continuam acesos.
-// - Pressionando novamente os botões b0 E b1 simultaneamente, apagam os LEDs L1 e L2.
-// - Liberando o acionamento dos botões, os leds continuam apagados.
-//  OBS: Utilizar a função AND (&) da linguagem C.
+/**
+ * @file Aula Prática 2 - Programa 4.ino
+ * @brief Aula Prática 2 - Programação e Montagem de Hardware na Plataforma Arduino
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de uma lógica aplicada em um circuito com dois botões e dois LEDs.
+ * B. Pressionando os botões b0 E b1 simultaneamente, acendem os LEDs L1 e L2.
+ * C. Liberando o acionamento dos botões, os leds continuam acesos.
+ * D. Pressionando novamente os botões b0 E b1 simultaneamente, apagam os LEDs L1 e L2.
+ * E. Liberando o acionamento dos botões, os leds continuam apagados.
+ * F. OBS: Utilizar a função AND (&) da linguagem C.
+ */
 
 // Pinos do Arduino
 int b0 = 2;  // Pino do botão b0

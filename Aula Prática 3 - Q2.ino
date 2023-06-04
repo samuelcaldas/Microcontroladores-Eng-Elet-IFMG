@@ -1,9 +1,14 @@
-// Aula Prática 3 - Programa 2
-// - Desenvolva uma lógica em que dois botões controlem o brilho de um LED,
-//   um aumente e o outro diminua o brilho.
-// - Deve conter 25/26 níveis com intervalo de 200ms. Quando chegar ao máximo ou mínimo,
-//   o botão correspondente não deverá mais atuar no brilho, ou seja, se chegou no máximo/mínimo,
-//   deverá ficar assim ate que o botão "oposto" seja pressionado.
+/**
+ * @file Aula Prática 3 - Programa 2.ino
+ * @brief Aula Prática 3 - Programação e Montagem de Hardware na Plataforma Arduino
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de uma lógica em que dois botões controlem o brilho de um LED, um aumente e o outro diminua o brilho.
+ * B. Deve conter 25/26 níveis com intervalo de 200ms.
+ * C. Quando chegar ao máximo ou mínimo, o botão correspondente não deverá mais atuar no brilho.
+ * D. Se chegou no máximo/mínimo, devera ficar assim ate que o botão "oposto" seja pressionado.
+ */
 
 // Definir os pinos dos botões e do LED
 #define LED_PIN 9

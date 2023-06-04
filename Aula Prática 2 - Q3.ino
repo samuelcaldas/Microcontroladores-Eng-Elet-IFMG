@@ -1,7 +1,14 @@
-// Aula Prática 2 - Programa 3
-// - Pressionando o botão b0 OU o botão b1 acendem os LEDs L1 e L2.
-// - Liberando o acionamento dos botões, o circuito voltará as condições iniciais.
-//  OBS: Utilizar a função OR ( | | ) da linguagem C
+/**
+ * @file Aula Prática 2 - Programa 3.ino
+ * @brief Aula Prática 2 - Programação e Montagem de Hardware na Plataforma Arduino
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de uma lógica aplicada em um circuito com dois botões e dois LEDs.
+ * B. Pressionando o botão b0 OU o botão b1 acendem os LEDs L1 e L2.
+ * C. Liberando o acionamento dos botões, o circuito voltará as condições iniciais.
+ * D. OBS: Utilizar a função OR ( | | ) da linguagem C.
+ */
 
 // Pinos do Arduino
 int b0 = 2;  // Pino do botão b0

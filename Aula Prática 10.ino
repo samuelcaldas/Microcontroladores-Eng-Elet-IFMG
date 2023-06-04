@@ -1,4 +1,12 @@
-// Aula Prática 10 - Teclado Matricial
+/**
+ * @file Aula Prática 10 - Programa 1.ino
+ * @brief Aula Prática 10 - Utilizando um teclado matricial 4x4 e um display LCD 16x2
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de uma lógica em que um teclado matricial 4x4 é utilizado para entrada de dados.
+ * B. As teclas pressionadas devem ser mostradas em um display LCD 16x2.
+ */
 
 #include <LiquidCrystal.h>
 #include <Keypad.h>

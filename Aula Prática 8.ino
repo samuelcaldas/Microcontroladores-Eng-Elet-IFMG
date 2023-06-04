@@ -1,6 +1,13 @@
-// Aula Prática 8
-// - Desenvolver um código para enviar através do monitor serial a proporção da resistência lida (0-100%) através do canal de entrada analógico.
-// - Desenvolver um código que acenda um LED quando a luminosidade for abaixo de 50%.
+/**
+ * @file Aula Prática 8.ino
+ * @brief Aula Prática 8 - LDR
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de uma lógica em que um fotorresistor LDR é utilizado para medir a luminosidade do ambiente.
+ * B. O código deve enviar através do monitor serial a proporção da resistência lida (0-100%) através do canal de entrada analógico.
+ * C. O código deve acender um LED quando a luminosidade for abaixo de 50%.
+ */
 
 #define ledPin 13 // Define o pino do LED
 #define ldrPin A0 // Define o pino do sensor LDR

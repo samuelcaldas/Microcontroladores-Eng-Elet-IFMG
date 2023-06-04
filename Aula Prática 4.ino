@@ -1,4 +1,17 @@
-// Aula Prática 4
+/**
+ * @file Aula Prática 4.ino
+ * @brief Aula Prática 4 - Programação e Montagem de Hardware na Plataforma Arduino
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de um sistema de acionamento de um LED RGB.
+ * B. Os LEDs RGB possuem internamente as três cores básicas: Vermelho, Verde e Azul.
+ * C. Podemos misturar as cores e alterar a intensidade de cada uma delas para representar qualquer cor do espectro visível.
+ * D. O LED RGB utilizado é do tipo Cátodo Comum.
+ * E. Em um primeiro momento vamos testar as cores básicas do LED e, na sequência, o acendimento do LED será definido por potenciômetros.
+ * F. A sequência de teste das cores é: Acende Vermelho na intensidade máxima e após 1s, Acende Verde na intensidade máxima e após 1s, Acende Azul na intensidade máxima e após 1s.
+ * G. A intensidade luminosa de cada cor será definida através de potenciômetros. Cada cor terá um potenciômetro.
+ */
 
 // Define os pinos dos LEDs
 #define LED_VERMELHO 11

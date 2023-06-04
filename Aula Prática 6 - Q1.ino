@@ -1,6 +1,14 @@
-// Aula Prática 6 - Programa 1
-//  Desenvolva um código onde um servo motor gire de 0 a 180º (180 níveis, 15 ms) quando um botão (BT1)
-//  for pressionado, e gire de 180º a 0º (180 níveis, 15 ms) quando outro botão (BT2) for pressionado.
+/**
+ * @file Aula Prática 6 - Programa 1.ino
+ * @brief Aula Prática 6 - Servo motor controlado por botão
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de uma lógica em que dois botões controlem o giro de um servo motor, um aumente e o outro diminua o giro.
+ * B. Deve conter 180 níveis com intervalo de 15ms.
+ * C. Quando chegar ao máximo ou mínimo, o botão correspondente não deverá mais atuar no giro.
+ * D. Se chegou no máximo/mínimo, devera ficar assim ate que o botão "oposto" seja pressionado.
+ */
 
 #include <Servo.h> // Inclui a biblioteca do Servo
 

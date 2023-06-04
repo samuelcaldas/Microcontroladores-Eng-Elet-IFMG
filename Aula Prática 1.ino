@@ -1,9 +1,17 @@
-// Aula Prática 1 - Controle de Estacionamento
-// - A cada carro que entrar um sensor S1 que detecta sua entrada irá incrementar a
-//   contagem e a cada carro que sair outro sensor S2 irá decrementar a contagem.
-// - A lotação máxima é de 15 carros. Enquanto houver vagas um led verde deve permanecer aceso.
-// - Quando a lotação atingir 80%, um led amarelo deve piscar com intervalos de ½ segundos;
-// - Quando a lotação máxima for atingida, um led vermelho deve acender indicando que não há vagas.
+/**
+ * @file Aula Prática 1.ino
+ * @brief Aula Prática 1 - Programação e Montagem de Hardware na Plataforma Arduino
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de uma lógica aplicada em um estacionamento de carros.
+ * B. Um sensor S1 deve detectar a entrada de carros e incrementar a contagem.
+ * C. Um sensor S2 deve detectar a saída de carros e decrementar a contagem.
+ * D. A lotação máxima é de 15 carros.
+ * E. Enquanto houver vagas, um led verde deve permanecer aceso.
+ * F. Quando a lotação atingir 80%, um led amarelo deve piscar com intervalos de ½ segundos.
+ * G. Quando a lotação máxima for atingida, um led vermelho deve acender indicando que não há vagas.
+ */
 
 int contador = 0;   // Contador de carros no estacionamento
 int maximo = 15;    // Lotação máxima do estacionamento

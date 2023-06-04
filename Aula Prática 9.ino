@@ -1,13 +1,14 @@
-// Aula Prática 9 - Indicador de Temperatura °C / °F
-//  Utilize o Arduino para desenvolver um sistema de indicação de temperatura em °C e °F. O
-// sistema deve conter um sensor de temperatura (TMP36), um display LCD 16 x 2, dois botões
-// e três LED's (verde, azul e amarelo) devendo apresentar as características descritas a seguir.
-//  O sistema só funciona após o botão 1 ser pressionado (pulsado) e o LED verde acenderá.
-// Se o botão 1 for pressionado novamente o sistema para de funcionar e o LED verde apaga.
-//  Utilize um display LCD 16x2 para exibir no monitor a temperatura de leitura (em °C e °F).
-//  O sistema inicia a indicação da temperatura em °C e o LED azul fica aceso até que o botão
-// B2 seja pressionado. Após pressionar (pulsar) o botão 2, o sistema indica a temperatura em
-// °F, o LED azul é apagado e o LED amarelo é aceso até que o botão 2 seja pressionado novamente.
+/**
+ * @file Aula Prática 9.ino
+ * @brief Aula Prática 9 - Indicador de Temperatura °C / °F
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de um sistema de indicação de temperatura em °C e °F utilizando o Arduino.
+ * B. O sistema deve conter um sensor de temperatura (TMP36), um display LCD 16 x 2, dois botões e três LED's (verde, azul e amarelo).
+ * C. O sistema só funciona após o botão 1 ser pressionado (pulsado) e o LED verde acenderá.
+ * D. Se o botão 1 for pressionado novamente o sistema para de funcionar e o LED verde apaga.
+ */
 
 // Inclui a biblioteca do display LCD
 #include <LiquidCrystal.h>

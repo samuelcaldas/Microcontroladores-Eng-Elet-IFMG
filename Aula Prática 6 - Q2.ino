@@ -1,5 +1,11 @@
-// Aula Prática 6 - Programa 2
-//  Desenvolva um código onde um servo motor tenha seu giro controlado por um potenciômetro.
+/**
+ * @file Aula Prática 6 - Programa 2.ino
+ * @brief Aula Prática 6 - Servo motor controlado por potenciômetro
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de uma lógica em que um potenciômetro controla o giro de um servo motor.
+ */
 
 #include <Servo.h> // Inclui a biblioteca do Servo
 

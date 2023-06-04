@@ -1,4 +1,14 @@
-// Aula Prática 5 - LCD 16x2
+/**
+ * @file Aula Prática 3.ino
+ * @brief Aula Prática 3 - LCD 16x2
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de uma lógica para controlar o brilho de um LED utilizando um display LCD 16x2.
+ * B. O display deve mostrar informações sobre o estado atual do LED e os botões devem ser usados para aumentar ou diminuir o brilho.
+ * C. O programa deve ter níveis de brilho pré-definidos e intervalos de tempo para mudança de brilho.
+ * D. Quando o brilho atingir o máximo ou mínimo, o botão correspondente não deve mais alterar o brilho.
+ */
 
 #include <LiquidCrystal.h>
 

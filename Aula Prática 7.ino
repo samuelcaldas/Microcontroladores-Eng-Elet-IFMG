@@ -1,10 +1,18 @@
-// Aula Prática 7
-// - Entre -40ºC e 25ºC o LED azul deve permanecer totalmente aceso;
-// - Entre 25ºC e 60ºC o LED amarelo deve aumentar seu brilho gradualmente conforme o aumento da temperatura;
-// - Entre 60ºC e 100ºC o LED vermelho deve piscar à uma frequência de 5 Hz indicando alerta;
-// - Se ultrapassar os 100ºC todos os LED's devem acender e o sistema deverá ser desativado;
-// - O sistema só retornará quando o botão for pressionado e a temperatura estiver abaixo dos 25ºC;
-// - Utilize o canal serial para exibir a temperatura de leitura no monitor serial;
+/**
+ * @file Aula Prática 7.ino
+ * @brief Aula Prática 7 - Sistema de alerta de controle de temperatura
+ * @version 1.0
+ * @date 2023-06-04
+ *
+ * A. O roteiro envolve o desenvolvimento de um sistema de alerta de controle de temperatura utilizando o Arduino.
+ * B. O sistema deve conter um sensor de temperatura, um botão e três LED's (um azul, um amarelo e um vermelho).
+ * C. Em temperaturas entre -40ºC e 25ºC o LED azul deve permanecer totalmente aceso.
+ * D. Em temperaturas entre 25ºC e 60ºC o LED amarelo deve aumentar seu brilho gradualmente conforme o aumento da temperatura.
+ * E. Em temperaturas entre 60ºC e 100ºC o LED vermelho deve piscar à uma frequência de 5 Hz indicando alerta.
+ * F. Se a temperatura ultrapassar os 100ºC todos os LED's devem acender e o sistema deverá ser desativado.
+ * G. O sistema só retornará quando o botão for pressionado e a temperatura estiver abaixo dos 25ºC.
+ * H. Utilize o canal serial para exibir a temperatura de leitura no monitor serial.
+ */
 
 // Definir o pinos do sensor de temperatura e o tipo de sensor
 #include "DHT.h"

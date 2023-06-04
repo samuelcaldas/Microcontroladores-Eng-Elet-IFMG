@@ -23,15 +23,15 @@
 
 // Define constants for pin numbers
 const int BOMBA_1_PIN = A1;
-const int LED_BOMBA_1_PIN = 3;
-const int BOTAO_BOMBA_1_PIN = 7;
+const int LED_BOMBA_1_PIN = 2;
+const int BOTAO_BOMBA_1_PIN = 6;
 const int BOMBA_2_PIN = A2;
-const int LED_BOMBA_2_PIN = 4;
-const int BOTAO_BOMBA_2_PIN = 8;
-const int LED_MODO_AUTOMATICO_PIN = 5;
-const int CHAVE_SELETORA_PIN = 9;
+const int LED_BOMBA_2_PIN = 3;
+const int BOTAO_BOMBA_2_PIN = 7;
+const int LED_MODO_AUTOMATICO_PIN = 4;
+const int CHAVE_SELETORA_PIN = 8;
 const int SENSOR_ANALOGICO_PIN = A0;
-const int LED_ERRO_SENSOR_PIN = 6;
+const int LED_ERRO_SENSOR_PIN = 5;
 const int SENSOR_DIGITAL_PINS[] = {10, 11, 12, 13};
 
 // Define constants for water level thresholds
@@ -208,15 +208,6 @@ protected:
    */
   virtual void pressionado() {}
 
-private:
-  // Pin number
-  int pin;
-
-  // Button state variables for debounce functionality
-  int estadoBotao;
-  int ultimoEstadoBotao;
-  unsigned long ultimoTempoMudancaEstado;
-
   /**
    * @brief Method to update the button state with debounce.
    */
@@ -244,6 +235,15 @@ private:
 
     ultimoEstadoBotao = leitura;
   }
+
+private:
+  // Pin number
+  int pin;
+
+  // Button state variables for debounce functionality
+  int estadoBotao;
+  int ultimoEstadoBotao;
+  unsigned long ultimoTempoMudancaEstado;
 };
 
 /**

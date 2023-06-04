@@ -32,6 +32,7 @@ const int LED_MODO_AUTOMATICO_PIN = 4;
 const int CHAVE_SELETORA_PIN = 6;
 const int SENSOR_ANALOGICO_PIN = A0;
 const int LED_ERRO_SENSOR_PIN = 11;
+const int pinoSensores[] = {12, 13, 14, 15};
 
 // Define constants for water level thresholds
 const int NIVEL_BAIXO = 25;
@@ -550,7 +551,6 @@ Botao botaoBomba1(BOTAO_BOMBA_1_PIN);
 Botao botaoBomba2(BOTAO_BOMBA_2_PIN);
 
 // Create objects for water level sensors
-const int pinoSensores[] = {12, 13, 14, 15};
 const int numSensores = sizeof(pinoSensores) / sizeof(pinoSensores[0]);
 SensorNivelDigital sensorNivel(pinoSensores, numSensores, &ledErroSensor);
 // SensorNivelAnalogico sensorNivel(SENSOR_ANALOGICO_PIN);

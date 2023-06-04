@@ -573,16 +573,16 @@ private:
   }
 };
 
-// Create objects for reservoir, and pumps
-Reservatorio reservatorio(0);
-Bomba bomba1(BOMBA_1_PIN, &ledBomba1);
-Bomba bomba2(BOMBA_2_PIN, &ledBomba2);
-
 // Create objects for LEDs
 LED ledBomba1(LED_BOMBA_1_PIN);
 LED ledBomba2(LED_BOMBA_2_PIN);
 LED ledModoAutomatico(LED_MODO_AUTOMATICO_PIN);
 LED ledErroSensor(LED_ERRO_SENSOR_PIN);
+
+// Create objects for reservoir, and pumps
+Reservatorio reservatorio(0);
+Bomba bomba1(BOMBA_1_PIN, &ledBomba1);
+Bomba bomba2(BOMBA_2_PIN, &ledBomba2);
 
 // Create objects for buttons and mode selector switch
 ChaveSeletora chaveSeletora(CHAVE_SELETORA_PIN, DEBOUNCE_DELAY, &ledModoAutomatico);

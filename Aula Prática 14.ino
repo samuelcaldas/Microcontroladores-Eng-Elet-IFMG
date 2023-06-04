@@ -586,9 +586,9 @@ LED ledModoAutomatico(LED_MODO_AUTOMATICO_PIN);
 LED ledErroSensor(LED_ERRO_SENSOR_PIN);
 
 // Create objects for buttons and mode selector switch
-ChaveSeletora chaveSeletora(CHAVE_SELETORA_PIN);
-Botao botaoBomba1(BOTAO_BOMBA_1_PIN);
-Botao botaoBomba2(BOTAO_BOMBA_2_PIN);
+ChaveSeletora chaveSeletora(CHAVE_SELETORA_PIN, DEBOUNCE_DELAY, &ledModoAutomatico);
+Botao botaoBomba1(BOTAO_BOMBA_1_PIN, DEBOUNCE_DELAY);
+Botao botaoBomba2(BOTAO_BOMBA_2_PIN, DEBOUNCE_DELAY);
 
 // Create objects for water level sensors
 const int numSensores = sizeof(SENSOR_DIGITAL_PINS) / sizeof(SENSOR_DIGITAL_PINS[0]);

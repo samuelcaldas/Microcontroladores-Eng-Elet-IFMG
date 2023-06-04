@@ -22,17 +22,17 @@
  */
 
 // Define constants for pin numbers
-const int BOMBA_1_PIN = 2;
+const int BOMBA_1_PIN = A1;
 const int LED_BOMBA_1_PIN = 3;
-const int BOTAO_BOMBA_1_PIN = 4;
-const int BOMBA_2_PIN = 5;
-const int LED_BOMBA_2_PIN = 6;
-const int BOTAO_BOMBA_2_PIN = 7;
-const int LED_MODO_AUTOMATICO_PIN = 8;
+const int BOTAO_BOMBA_1_PIN = 7;
+const int BOMBA_2_PIN = A2;
+const int LED_BOMBA_2_PIN = 4;
+const int BOTAO_BOMBA_2_PIN = 8;
+const int LED_MODO_AUTOMATICO_PIN = 5;
 const int CHAVE_SELETORA_PIN = 9;
 const int SENSOR_ANALOGICO_PIN = A0;
-const int LED_ERRO_SENSOR_PIN = 10;
-const int SENSOR_DIGITAL_PINS[] = {11, 12, 13, A1};
+const int LED_ERRO_SENSOR_PIN = 6;
+const int SENSOR_DIGITAL_PINS[] = {10, 11, 12, 13};
 
 // Define constants for water level thresholds
 const int NIVEL_BAIXO = 25;

@@ -460,7 +460,6 @@ public:
    * @param reservatorio A pointer to a Reservatorio object.
    * @param bomba1 A pointer to a Bomba object representing pump 1.
    * @param bomba2 A pointer to a Bomba object representing pump 2.
-   * @param ledModoAutomatico A pointer to an LED object that will be used to indicate automatic mode.
    * @param chaveSeletora A pointer to a ChaveSeletora object representing the mode selector switch.
    * @param botaoBomba1 A pointer to a Botao object representing button 1 for manual mode.
    * @param botaoBomba2 A pointer to a Botao object representing button 2 for manual mode.
@@ -469,7 +468,6 @@ public:
   SistemaDeControle(Reservatorio *reservatorio,
                     Bomba *bomba1,
                     Bomba *bomba2,
-                    LED *ledModoAutomatico,
                     ChaveSeletora *chaveSeletora,
                     Botao *botaoBomba1,
                     Botao *botaoBomba2,
@@ -477,7 +475,6 @@ public:
       : reservatorio(reservatorio),
         bomba1(bomba1),
         bomba2(bomba2),
-        ledModoAutomatico(ledModoAutomatico),
         chaveSeletora(chaveSeletora),
         botaoBomba1(botaoBomba1),
         botaoBomba2(botaoBomba2),
@@ -490,14 +487,14 @@ public:
    */
   void atualizar()
   {
+    reservatorio->setNivel(sensorNivel->lerNivel());
+
     if (chaveSeletora->estaLigado())
     {
-      ledModoAutomatico->ligar();
       modoAutomatico();
     }
     else
     {
-      ledModoAutomatico->desligar();
       modoManual();
     }
   }
@@ -506,7 +503,6 @@ private:
   Reservatorio *reservatorio;
   Bomba *bomba1;
   Bomba *bomba2;
-  LED *ledModoAutomatico;
   ChaveSeletora *chaveSeletora;
   Botao *botaoBomba1;
   Botao *botaoBomba2;
@@ -519,8 +515,6 @@ private:
    */
   void modoAutomatico()
   {
-    reservatorio->setNivel(sensorNivel->lerNivel());
-
     if (reservatorio->getNivel() < NIVEL_BAIXO)
     {
       // Water level is very low - turn on both pumps
@@ -576,12 +570,14 @@ private:
   }
 };
 
-// Create objects for reservoir, pumps and LEDs
+// Create objects for reservoir, and pumps
 Reservatorio reservatorio(0);
-LED ledBomba1(LED_BOMBA_1_PIN);
-LED ledBomba2(LED_BOMBA_2_PIN);
 Bomba bomba1(BOMBA_1_PIN, &ledBomba1);
 Bomba bomba2(BOMBA_2_PIN, &ledBomba2);
+
+// Create objects for LEDs
+LED ledBomba1(LED_BOMBA_1_PIN);
+LED ledBomba2(LED_BOMBA_2_PIN);
 LED ledModoAutomatico(LED_MODO_AUTOMATICO_PIN);
 LED ledErroSensor(LED_ERRO_SENSOR_PIN);
 
@@ -599,7 +595,6 @@ SensorNivelDigital sensorNivel(SENSOR_DIGITAL_PINS, numSensores, &ledErroSensor)
 SistemaDeControle sistemaDeControle(&reservatorio,
                                     &bomba1,
                                     &bomba2,
-                                    &ledModoAutomatico,
                                     &chaveSeletora,
                                     &botaoBomba1,
                                     &botaoBomba2,

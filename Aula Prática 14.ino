@@ -353,11 +353,12 @@ public:
    * @param ledErroSensor A pointer to an LED object that will be used to indicate errors.
    */
   SensorNivelDigital(const int *pPinos, int numPinos, LED *ledErroSensor)
-      : pPinos(pPinos), numPinos(numPinos), ledErroSensor(ledErroSensor)
+    : pPinos(pPinos), numPinos(numPinos), ledErroSensor(ledErroSensor)
   {
+    chavesBoia = new ChaveBoia[numPinos];
     for (int i = 0; i < numPinos; i++)
     {
-      pinMode(pPinos[i], INPUT_PULLUP);
+      chavesBoia[i] = ChaveBoia(pPinos[i], DEBOUNCE_DELAY);
     }
   }
 
@@ -383,6 +384,7 @@ private:
   const int *pPinos;
   const int numPinos;
   LED *ledErroSensor;
+  ChaveBoia *chavesBoia;
 
   /**
    * @brief Method to check if the digital sensor is in an invalid state.
@@ -392,7 +394,7 @@ private:
   {
     for (int i = numPinos - 1; i >= 1; i--)
     {
-      if (digitalRead(pPinos[i]) == LOW && digitalRead(pPinos[i - 1]) == HIGH)
+      if (!chavesBoia[i].estaLigado() && chavesBoia[i - 1].estaLigado())
       {
         return true;
       }
@@ -408,7 +410,7 @@ private:
   {
     for (int i = 0; i < numPinos; i++)
     {
-      if (digitalRead(pPinos[i]) == LOW)
+      if (!chavesBoia[i].estaLigado())
       {
         return map(i + 1, 1, numPinos, 0, 100);
       }

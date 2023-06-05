@@ -38,6 +38,7 @@ const int SENSOR_DIGITAL_PINS[] = {10, 11, 12, 13};
 const int NIVEL_BAIXO = 25;
 const int NIVEL_MEDIO = 50;
 const int NIVEL_ALTO = 75;
+const int NIVEL_MAXIMO = 100;
 
 // Define constants for debounce time
 const unsigned long DEBOUNCE_DELAY = 50;
@@ -495,7 +496,7 @@ public:
 
     if (chaveSeletora->estaLigado())
     {
-      modoAutomatico();
+      modoAutomatico(reservatorio->getNivel());
     }
     else
     {
@@ -517,30 +518,29 @@ private:
    *
    * This method reads the water level from the sensor and turns on/off the pumps accordingly.
    */
-  void modoAutomatico()
+  void modoAutomatico(int nivel)
   {
-    if (reservatorio->getNivel() < NIVEL_BAIXO)
+    // Bomba 1 - 50% ~ 100%
+    if (nivel >= NIVEL_MEDIO && nivel < NIVEL_MAXIMO)
     {
-      // Water level is very low - turn on both pumps
+      // Water level is between 50% and 100% - turn on pump 1
       bomba1->ligar();
+    }
+    else if (nivel == NIVEL_MAXIMO)
+    {
+      // Water level is 100% - turn off pump 1
+      bomba1->desligar();
+    }
+
+    // Bomba 2 - 0% ~ 25%
+    if (nivel < NIVEL_BAIXO)
+    {
+      // Water level is very low - turn on pump 2
       bomba2->ligar();
     }
-    else if (reservatorio->getNivel() < NIVEL_MEDIO)
+    else if (nivel >= NIVEL_ALTO)
     {
-      // Water level is below 50% - turn on pump 1 and turn off pump 2
-      bomba1->ligar();
-      bomba2->desligar();
-    }
-    else if (reservatorio->getNivel() < NIVEL_ALTO)
-    {
-      // Water level is between 50% and 75% - turn off both pumps
-      bomba1->desligar();
-      bomba2->desligar();
-    }
-    else
-    {
-      // Water level is above 75% - turn off both pumps
-      bomba1->desligar();
+      // Water level is above 75% - turn off pump 2
       bomba2->desligar();
     }
   }

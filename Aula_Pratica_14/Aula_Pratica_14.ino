@@ -396,7 +396,7 @@ private:
   {
     for (int i = numPinos - 1; i >= 1; i--)
     {
-      if (!chavesBoia[i]->estaLigado() && chavesBoia[i - 1]->estaLigado())
+      if (chavesBoia[i]->estaLigado() && !chavesBoia[i - 1]->estaLigado())
       {
         return true;
       }
@@ -414,11 +414,11 @@ private:
     {
       if (!chavesBoia[i]->estaLigado())
       {
-        return map(i + 1, 1, numPinos, 0, 100);
+        return map(i, 0, numPinos, 0, 100);
       }
     }
 
-    return 0;
+    return 100;
   }
 };
 

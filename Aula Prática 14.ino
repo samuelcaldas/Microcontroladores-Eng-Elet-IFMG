@@ -200,7 +200,7 @@ public:
   bool estaLigado()
   {
     atualizar();
-    return estadoSwitch;
+    return (estadoSwitch == LOW);
   }
 
 protected:

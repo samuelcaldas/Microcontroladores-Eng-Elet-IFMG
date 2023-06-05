@@ -521,7 +521,7 @@ private:
   void modoAutomatico(int nivel)
   {
     // Bomba 1 - 50% ~ 100%
-    if (nivel >= NIVEL_MEDIO && nivel < NIVEL_MAXIMO)
+    if (nivel < NIVEL_MEDIO)
     {
       // Water level is between 50% and 100% - turn on pump 1
       bomba1->ligar();

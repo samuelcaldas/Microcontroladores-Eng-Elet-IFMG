@@ -277,15 +277,10 @@ private:
 class Control
 {
 public:
-  Control(LED_Controller &led_controller, LED_PWM_Controller &led_pwm_controller, Potentiometer_Controller &potentiometer_controller, Button_Controller &button_controller, SoftwareSerial &bluetooth)
-      : led_controller(led_controller), led_pwm_controller(led_pwm_controller), potentiometer_controller(potentiometer_controller), button_controller(button_controller), bluetooth(bluetooth)
-  {
-  }
+  Control(Controller *controllers[], int numControllers, SoftwareSerial &bluetooth) : controllers(controllers), numControllers(numControllers), bluetooth(bluetooth) {}
 
   String run(const BluetoothData &data)
   {
-    Controller *controllers[] = {&led_controller, &led_pwm_controller, &potentiometer_controller, &button_controller};
-    int numControllers = sizeof(controllers) / sizeof(controllers[0]);
     for (int i = 0; i < numControllers; i++)
     {
       String result = controllers[i]->control(data);
@@ -299,10 +294,8 @@ public:
   }
 
 private:
-  LED_Controller &led_controller;
-  LED_PWM_Controller &led_pwm_controller;
-  Potentiometer_Controller &potentiometer_controller;
-  Button_Controller &button_controller;
+  Controller **controllers;
+  int numControllers;
   SoftwareSerial &bluetooth;
 };
 
@@ -321,8 +314,12 @@ LED_PWM_Controller led_pwm_controller(led_pwm);
 Potentiometer_Controller potentiometer_controller(potentiometer);
 Button_Controller button_controller(button);
 
+// Criando um array de ponteiros para as classes controladoras
+Controller *controllers[] = {&led_controller, &led_pwm_controller, &potentiometer_controller, &button_controller};
+int numControllers = sizeof(controllers) / sizeof(controllers[0]);
+
 // Criando um objeto da classe Control
-Control control(led_controller, led_pwm_controller, potentiometer_controller, button_controller, bluetooth);
+Control control(controllers, numControllers, bluetooth);
 
 void setup()
 {

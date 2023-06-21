@@ -27,12 +27,15 @@
 #include "SoftwareSerial.h"
 
 // Definindo constantes para os pinos
-#define LED_PIN 13
-#define LED_PWM_PIN 5
-#define POTENTIOMETER_PIN A0
-#define BUTTON_PIN 4
-#define BLUETOOTH_RX 2
-#define BLUETOOTH_TX 3
+const unsigned int LED_PIN = 13;
+const unsigned int LED_PWM_PIN = 5;
+const unsigned int POTENTIOMETER_PIN = A0;
+const unsigned int BUTTON_PIN = 4;
+const unsigned int BLUETOOTH_RX = 2;
+const unsigned int BLUETOOTH_TX = 3;
+
+// Define constants for debounce time
+const unsigned int DEBOUNCE_DELAY = 50;
 
 class BluetoothData
 {
@@ -80,11 +83,15 @@ private:
 class LED
 {
 public:
-  LED(int pin) : pin(pin) { pinMode(pin, OUTPUT); }
-  void on() { digitalWrite(pin, HIGH); }
-  void off() { digitalWrite(pin, LOW); }
+  LED(int pin) : pin(pin)
+  {
+    pinMode(pin, OUTPUT);
+    desligar();
+  }
+  void ligar() { digitalWrite(pin, HIGH); }
+  void desligar() { digitalWrite(pin, LOW); }
 
-private:
+protected:
   int pin;
 };
 
@@ -92,7 +99,8 @@ class LED_PWM : public LED
 {
 public:
   LED_PWM(int pin) : LED(pin) {}
-  void on(int brightness) { analogWrite(pin, brightness); }
+  void ligar(int brightness) { analogWrite(pin, brightness); }
+  void desligar() { analogWrite(pin, 0); }
 };
 
 class Potentiometer
@@ -108,11 +116,50 @@ private:
 class Button
 {
 public:
-  Button(int pin) : pin(pin) { pinMode(pin, INPUT); }
-  bool read() { return digitalRead(pin); }
+  Button(int pin, unsigned long debounceDelay) : pin(pin), debounceDelay(debounceDelay)
+  {
+    pinMode(pin, INPUT_PULLUP);
+
+    estadoSwitch = digitalRead(pin);
+    ultimoEstadoSwitch = estadoSwitch;
+    ultimoTempoMudancaEstado = 0;
+  }
+
+  bool read()
+  {
+    atualizar();
+    return (estadoSwitch == LOW);
+  }
+
+protected:
+  void atualizar()
+  {
+    int leitura = digitalRead(pin);
+
+    if (leitura != ultimoEstadoSwitch)
+    {
+      ultimoTempoMudancaEstado = millis();
+    }
+
+    if ((millis() - ultimoTempoMudancaEstado) > debounceDelay)
+    {
+      if (leitura != estadoSwitch)
+      {
+        estadoSwitch = leitura;
+      }
+    }
+
+    ultimoEstadoSwitch = leitura;
+  }
 
 private:
   int pin;
+
+  // Button state variables for debounce functionality
+  unsigned long debounceDelay;
+  int estadoSwitch;
+  int ultimoEstadoSwitch;
+  unsigned long ultimoTempoMudancaEstado;
 };
 
 class Controller
@@ -130,12 +177,12 @@ public:
   {
     if (data.getCommand() == LED_ON)
     {
-      led.on();
+      led.ligar();
       return "LED ligado";
     }
     else if (data.getCommand() == LED_OFF)
     {
-      led.off();
+      led.desligar();
       return "LED desligado";
     }
     else
@@ -154,7 +201,7 @@ private:
 class LED_PWM_Controller : public Controller
 {
 public:
-  LED_PWM_Controller(LED_PWM &led_pwm, SoftwareSerial &bluetooth) : led_pwm(led_pwm), bluetooth(bluetooth) {}
+  LED_PWM_Controller(LED_PWM &led_pwm) : led_pwm(led_pwm) {}
 
   String control(const BluetoothData &data) override
   {
@@ -167,13 +214,13 @@ public:
       brightness = max(0, min(255, brightness));
 
       // Ajustando o brilho do LED PWM
-      led_pwm.on(brightness);
+      led_pwm.ligar(brightness);
 
       return "LED PWM ligado com brilho " + String(brightness);
     }
     else if (data.getCommand() == LED_OFF)
     {
-      led_pwm.off();
+      led_pwm.desligar();
       return "LED PWM desligado";
     }
     else
@@ -259,18 +306,18 @@ private:
   SoftwareSerial &bluetooth;
 };
 
-// Criando uma nova serial de software para o bluetooth
+// Criando uma nova software de serial para o bluetooth
 SoftwareSerial bluetooth(BLUETOOTH_RX, BLUETOOTH_TX);
 
 // Criando objetos das classes LED, LED PWM, Potenciômetro e Botão
 LED led(LED_PIN);
 LED_PWM led_pwm(LED_PWM_PIN);
 Potentiometer potentiometer(POTENTIOMETER_PIN);
-Button button(BUTTON_PIN);
+Button button(BUTTON_PIN, DEBOUNCE_DELAY);
 
 // Criando objetos das classes controladoras
 LED_Controller led_controller(led);
-LED_PWM_Controller led_pwm_controller(led_pwm, bluetooth);
+LED_PWM_Controller led_pwm_controller(led_pwm);
 Potentiometer_Controller potentiometer_controller(potentiometer);
 Button_Controller button_controller(button);
 

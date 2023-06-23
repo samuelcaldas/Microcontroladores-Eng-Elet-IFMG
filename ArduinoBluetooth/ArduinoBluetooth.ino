@@ -73,6 +73,12 @@ public:
     // Convertendo a string lida para um valor inteiro
     int value = valueStr.toInt();
 
+    // Imprimindo o comando e o valor lidos no monitor serial
+    Serial.print("Command: ");
+    Serial.print(command);
+    Serial.print(", Value: ");
+    Serial.println(value);
+
     return BluetoothData(command, value);
   }
 
@@ -244,7 +250,7 @@ public:
   String control(const BluetoothData &data) override
   {
     if (data.getCommand() == POT_READ)
-      return "Valor do potenciômetro: " + String(potentiometer.read());
+    return "Valor do potenciômetro: " + String(potentiometer.read());
     else
       return "";
   }
@@ -263,7 +269,7 @@ public:
   String control(const BluetoothData &data) override
   {
     if (data.getCommand() == BUTTON_READ)
-      return button.read() ? "Botão pressionado" : "Botão não pressionado";
+    return button.read() ? "Botão pressionado" : "Botão não pressionado";
     else
       return "";
   }
@@ -325,6 +331,9 @@ void setup()
 {
   // Iniciando a serial do bluetooth com a velocidade de 9600 bps
   bluetooth.begin(9600);
+
+  // Iniciando a serial do monitor serial
+  Serial.begin(9600);
 }
 
 void loop()

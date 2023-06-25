@@ -9,7 +9,7 @@ O projeto inclui código-fonte para o aplicativo Android, desenvolvido usando o 
 Para instalar o projeto, siga estas etapas:
 
 1. Clone este repositório para o seu computador.
-2. Abra o arquivo `Controle_Arduino_Bluetooth.aia` no MIT App Inventor 2 e siga as instruções para compilar e instalar o aplicativo no seu dispositivo Android.
+2. Abra o arquivo `ArduinoBluetooth.aia` no MIT App Inventor 2 e siga as instruções para compilar e instalar o aplicativo no seu dispositivo Android.
 3. Abra o arquivo `AndroidBluetooth.ino` na IDE do Arduino e carregue-o no seu Arduino.
 
 ## Uso

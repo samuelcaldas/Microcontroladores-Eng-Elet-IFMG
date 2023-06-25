@@ -115,7 +115,10 @@ protected:
 class LED_PWM : public LED
 {
 public:
-  LED_PWM(int pin) : LED(pin) {}
+  LED_PWM(int pin) : LED(pin)
+  {
+    desligar();
+  }
   void ligar(int brightness) { analogWrite(pin, brightness); }
   void desligar() { analogWrite(pin, 0); }
 };
@@ -407,5 +410,5 @@ void loop()
 {
   controlSender.run();
   controlReceiver.run();
-  delay(50);
+  delay(100);
 }

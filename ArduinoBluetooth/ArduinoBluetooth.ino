@@ -27,12 +27,12 @@
 #include "SoftwareSerial.h"
 
 // Definindo constantes para os pinos
-const unsigned int LED_PIN = 13;
-const unsigned int LED_PWM_PIN = 5;
-const unsigned int POTENTIOMETER_PIN = A0;
-const unsigned int BUTTON_PIN = 4;
 const unsigned int BLUETOOTH_RX = 2;
 const unsigned int BLUETOOTH_TX = 3;
+const unsigned int BUTTON_PIN = 4;
+const unsigned int LED_PWM_PIN = 5;
+const unsigned int LED_PIN = 13;
+const unsigned int POTENTIOMETER_PIN = A0;
 
 // Define constants for debounce time
 const unsigned int DEBOUNCE_DELAY = 50;
@@ -57,29 +57,40 @@ public:
 
   BluetoothData readData()
   {
-    // Lendo o primeiro caractere da serial do bluetooth para obter o comando
-    char command = bluetooth.read();
-
-    // Lendo os próximos caracteres da serial do bluetooth para obter o valor inteiro
-    String valueStr = "";
-    while (bluetooth.available())
+    if (bluetooth.available() > 0)
     {
-      char b = bluetooth.read();
-      if (b == '\n' || b == '\r')
-        break;
-      valueStr += b;
+      if (bluetooth.peek() != -1)
+      {
+        // Lendo o primeiro caractere da serial do bluetooth para obter o comando
+        char command = (char)bluetooth.read();
+
+        // Verificando se o comando é uma letra maiúscula
+        if (command < 'A' || command > 'Z')
+          return BluetoothData('\0', 0);
+
+        // Lendo os próximos caracteres da serial do bluetooth para obter o valor inteiro de 0 a 255
+        int value = 0;
+        if (bluetooth.available() > 0)
+        {
+          value = bluetooth.read();
+        }
+
+        // Verificando se o valor está entre 0 e 255
+        if (value < 0 || value > 255)
+        {
+          return BluetoothData('\0', 0);
+        }
+
+        // Imprimindo o comando e o valor lidos no monitor serial
+        Serial.print("Command: ");
+        Serial.print(command);
+        Serial.print(", Value: ");
+        Serial.println(value);
+
+        return BluetoothData(command, value);
+      }
     }
-
-    // Convertendo a string lida para um valor inteiro
-    int value = valueStr.toInt();
-
-    // Imprimindo o comando e o valor lidos no monitor serial
-    Serial.print("Command: ");
-    Serial.print(command);
-    Serial.print(", Value: ");
-    Serial.println(value);
-
-    return BluetoothData(command, value);
+    return BluetoothData('\0', 0);
   }
 
 private:
@@ -112,11 +123,31 @@ public:
 class Potentiometer
 {
 public:
-  Potentiometer(int pin) : pin(pin) {}
-  int read() { return analogRead(pin); }
+  Potentiometer(int pin, int numReadings) : pin(pin), numReadings(numReadings)
+  {
+    readings = new int[numReadings];
+    for (int i = 0; i < numReadings; i++)
+    {
+      readings[i] = 0;
+    }
+  }
+
+  int read()
+  {
+    total = total - readings[index];
+    readings[index] = analogRead(pin);
+    total = total + readings[index];
+    index = (index + 1) % numReadings;
+    int average = total / numReadings;
+    return map(average, 0, 1023, 0, 255);
+  }
 
 private:
+  int *readings;
+  int total = 0;
+  int index = 0;
   int pin;
+  int numReadings;
 };
 
 class Button
@@ -171,29 +202,45 @@ private:
 class Controller
 {
 public:
-  virtual String control(const BluetoothData &data) = 0;
+  virtual void control(const BluetoothData &data) = 0;
+  virtual BluetoothData control()
+  {
+    return BluetoothData('\0', 0);
+  };
 };
 
-class LED_Controller : public Controller
+class ReceiverController : public Controller
+{
+public:
+  BluetoothData control() override { return BluetoothData('\0', 0); }
+};
+
+class SenderController : public Controller
+{
+public:
+  void control(const BluetoothData &data) override { return; }
+};
+
+class LED_Controller : public ReceiverController
 {
 public:
   LED_Controller(LED &led) : led(led) {}
 
-  String control(const BluetoothData &data) override
+  void control(const BluetoothData &data) override
   {
     if (data.getCommand() == LED_ON)
     {
       led.ligar();
-      return "LED ligado";
+      Serial.println("LED ligado");
     }
     else if (data.getCommand() == LED_OFF)
     {
       led.desligar();
-      return "LED desligado";
+      Serial.println("LED desligado");
     }
     else
     {
-      return "";
+      return;
     }
   }
 
@@ -204,12 +251,12 @@ private:
   LED &led;
 };
 
-class LED_PWM_Controller : public Controller
+class LED_PWM_Controller : public ReceiverController
 {
 public:
   LED_PWM_Controller(LED_PWM &led_pwm) : led_pwm(led_pwm) {}
 
-  String control(const BluetoothData &data) override
+  void control(const BluetoothData &data) override
   {
     if (data.getCommand() == PWM_WRITE)
     {
@@ -222,61 +269,53 @@ public:
       // Ajustando o brilho do LED PWM
       led_pwm.ligar(brightness);
 
-      return "LED PWM ligado com brilho " + String(brightness);
+      Serial.println("LED PWM ligado com brilho " + String(brightness));
     }
     else if (data.getCommand() == LED_OFF)
     {
       led_pwm.desligar();
-      return "LED PWM desligado";
+      Serial.println("LED PWM desligado");
     }
     else
     {
-      return "";
+      return;
     }
   }
 
 private:
-  static const char PWM_WRITE = 'P';
+  static const char PWM_WRITE = 'W';
   static const char LED_OFF = 'L';
 
   LED_PWM &led_pwm;
 };
 
-class Potentiometer_Controller : public Controller
+class Potentiometer_Controller : public SenderController
 {
 public:
   Potentiometer_Controller(Potentiometer &potentiometer) : potentiometer(potentiometer) {}
 
-  String control(const BluetoothData &data) override
+  BluetoothData control() override
   {
-    if (data.getCommand() == POT_READ)
-    return "Valor do potenciômetro: " + String(potentiometer.read());
-    else
-      return "";
+    int potValue = potentiometer.read();
+    return BluetoothData('P', potValue);
   }
 
 private:
-  static const char POT_READ = 'A';
-
   Potentiometer &potentiometer;
 };
 
-class Button_Controller : public Controller
+class Button_Controller : public SenderController
 {
 public:
   Button_Controller(Button &button) : button(button) {}
 
-  String control(const BluetoothData &data) override
+  BluetoothData control() override
   {
-    if (data.getCommand() == BUTTON_READ)
-    return button.read() ? "Botão pressionado" : "Botão não pressionado";
-    else
-      return "";
+    bool state = button.read();
+    return BluetoothData('B', (int)state);
   }
 
 private:
-  static const char BUTTON_READ = 'B';
-
   Button &button;
 };
 
@@ -285,33 +324,56 @@ class Control
 public:
   Control(Controller *controllers[], int numControllers, SoftwareSerial &bluetooth) : controllers(controllers), numControllers(numControllers), bluetooth(bluetooth) {}
 
-  String run(const BluetoothData &data)
-  {
-    for (int i = 0; i < numControllers; i++)
-    {
-      String result = controllers[i]->control(data);
-      if (result != "")
-      {
-        bluetooth.println(result);
-        break;
-      }
-    }
-    return "";
-  }
+  virtual void run() = 0;
 
-private:
+protected:
   Controller **controllers;
   int numControllers;
   SoftwareSerial &bluetooth;
 };
 
-// Criando uma nova software de serial para o bluetooth
+class ControlSender : public Control
+{
+public:
+  ControlSender(Controller *controllers[], int numControllers, SoftwareSerial &bluetooth) : Control(controllers, numControllers, bluetooth) {}
+
+  void run() override
+  {
+    for (int i = 0; i < numControllers; i++)
+    {
+      BluetoothData result = controllers[i]->control();
+      bluetooth.write(result.getCommand()); // Envia o comando
+      bluetooth.write(result.getValue());   // Envia o valor
+    }
+  }
+};
+
+class ControlReceiver : public Control
+{
+public:
+  ControlReceiver(Controller *controllers[], int numControllers, SoftwareSerial &bluetooth) : Control(controllers, numControllers, bluetooth) {}
+
+  void run() override
+  {
+    if (bluetooth.available() > 0)
+    {
+      BluetoothReader reader(bluetooth);
+      BluetoothData data = reader.readData();
+      for (int i = 0; i < numControllers; i++)
+      {
+        controllers[i]->control(data);
+      }
+    }
+  }
+};
+
+// Criando uma nova conexão de serial com o bluetooth
 SoftwareSerial bluetooth(BLUETOOTH_RX, BLUETOOTH_TX);
 
 // Criando objetos das classes LED, LED PWM, Potenciômetro e Botão
 LED led(LED_PIN);
 LED_PWM led_pwm(LED_PWM_PIN);
-Potentiometer potentiometer(POTENTIOMETER_PIN);
+Potentiometer potentiometer(POTENTIOMETER_PIN, 50);
 Button button(BUTTON_PIN, DEBOUNCE_DELAY);
 
 // Criando objetos das classes controladoras
@@ -321,11 +383,16 @@ Potentiometer_Controller potentiometer_controller(potentiometer);
 Button_Controller button_controller(button);
 
 // Criando um array de ponteiros para as classes controladoras
-Controller *controllers[] = {&led_controller, &led_pwm_controller, &potentiometer_controller, &button_controller};
-int numControllers = sizeof(controllers) / sizeof(controllers[0]);
+ReceiverController *receiverControllers[] = {&led_controller, &led_pwm_controller};
+int numReceiverControllers = sizeof(receiverControllers) / sizeof(receiverControllers[0]);
+
+// Criando um array de ponteiros para as classes controladoras
+SenderController *senderControllers[] = {&potentiometer_controller, &button_controller};
+int numSenderControllers = sizeof(senderControllers) / sizeof(senderControllers[0]);
 
 // Criando um objeto da classe Control
-Control control(controllers, numControllers, bluetooth);
+ControlSender controlSender(senderControllers, numSenderControllers, bluetooth);
+ControlReceiver controlReceiver(receiverControllers, numReceiverControllers, bluetooth);
 
 void setup()
 {
@@ -338,14 +405,6 @@ void setup()
 
 void loop()
 {
-  if (bluetooth.available())
-  {
-    BluetoothReader reader(bluetooth);
-    BluetoothData data = reader.readData();
-    String result = control.run(data);
-    if (result != "")
-    {
-      bluetooth.println(result);
-    }
-  }
+  controlSender.run();
+  controlReceiver.run();
 }

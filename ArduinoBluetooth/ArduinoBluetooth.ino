@@ -35,7 +35,7 @@ const unsigned int LED_PIN = 13;
 const unsigned int POTENTIOMETER_PIN = A0;
 
 // Define constants for debounce time
-const unsigned int DEBOUNCE_DELAY = 50;
+const unsigned int DEBOUNCE_DELAY = 10;
 
 class BluetoothData
 {
@@ -373,7 +373,7 @@ SoftwareSerial bluetooth(BLUETOOTH_RX, BLUETOOTH_TX);
 // Criando objetos das classes LED, LED PWM, Potenciômetro e Botão
 LED led(LED_PIN);
 LED_PWM led_pwm(LED_PWM_PIN);
-Potentiometer potentiometer(POTENTIOMETER_PIN, 50);
+Potentiometer potentiometer(POTENTIOMETER_PIN, 20);
 Button button(BUTTON_PIN, DEBOUNCE_DELAY);
 
 // Criando objetos das classes controladoras
@@ -407,4 +407,5 @@ void loop()
 {
   controlSender.run();
   controlReceiver.run();
+  delay(50);
 }

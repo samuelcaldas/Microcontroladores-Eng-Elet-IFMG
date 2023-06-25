@@ -20,7 +20,6 @@
  * - Polimorfismo: a classe abstrata Controller define uma interface comum para as classes controladoras
  * - Princípio Aberto-Fechado: as classes controladoras implementam suas próprias versões do método control sem modificar o código existente
  * - Comunicação serial: a classe SoftwareSerial é utilizada para ler dados enviados pelo aplicativo Bluetooth
- * - Conversão de tipos: a classe String é utilizada para converter uma string em um valor inteiro
  */
 
 // Incluindo a biblioteca SoftwareSerial

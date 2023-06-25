@@ -11,8 +11,8 @@
  * Os comandos enviados pelo aplicativo Bluetooth são:
  * - 'H': liga o LED
  * - 'L': desliga o LED e o LED PWM
- * - 'P': ajusta o brilho do LED PWM (deve ser seguido pelo valor do brilho)
- * - 'A': lê o valor do potenciômetro
+ * - 'W': ajusta o brilho do LED PWM (deve ser seguido pelo valor do brilho)
+ * - 'P': lê o valor do potenciômetro
  * - 'B': lê o estado do botão
  *
  * O código utiliza os seguintes conceitos e técnicas:

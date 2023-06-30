@@ -9,7 +9,7 @@ O projeto inclui código-fonte para o aplicativo Android, desenvolvido usando o 
 Para instalar o projeto, siga estas etapas:
 
 1. Clone este repositório para o seu computador.
-2. Abra o arquivo `Controle_Arduino_Bluetooth.aia` no MIT App Inventor 2 e siga as instruções para compilar e instalar o aplicativo no seu dispositivo Android.
+2. Abra o arquivo `ArduinoBluetooth.aia` no MIT App Inventor 2 e siga as instruções para compilar e instalar o aplicativo no seu dispositivo Android.
 3. Abra o arquivo `AndroidBluetooth.ino` na IDE do Arduino e carregue-o no seu Arduino.
 
 ## Uso
@@ -17,8 +17,8 @@ Para instalar o projeto, siga estas etapas:
 Para usar o projeto, siga estas etapas:
 
 1. Conecte os componentes eletrônicos ao seu Arduino de acordo com o esquema de conexão fornecido no código-fonte do Arduino.
-2. Inicie o aplicativo Controle_Arduino_Bluetooth no seu dispositivo Android.
-3. Use o aplicativo para se conectar ao seu Arduino via Bluetooth (A senha costuma ser 1234).
+2. Inicie o aplicativo ArduinoBluetooth no seu dispositivo Android.
+3. Use o aplicativo para se conectar ao seu Arduino via Bluetooth (A senha padrão é 1234).
 4. Use os controles do aplicativo para enviar comandos para o Arduino e controlar os componentes eletrônicos conectados.
 
 ## Contribuindo
@@ -31,4 +31,4 @@ Este projeto está licenciado sob a licença MIT. Consulte o arquivo `LICENSE.tx
 
 ## Contato
 
-Se você tiver dúvidas ou comentários sobre este projeto, entre em contato conosco pelo endereço de e-mail [inserir endereço de e-mail aqui].
+Se você tiver dúvidas ou comentários sobre este projeto, entre em contato conosco.

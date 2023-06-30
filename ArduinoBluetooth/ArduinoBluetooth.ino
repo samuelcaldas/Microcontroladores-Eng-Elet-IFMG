@@ -11,8 +11,8 @@
  * Os comandos enviados pelo aplicativo Bluetooth são:
  * - 'H': liga o LED
  * - 'L': desliga o LED e o LED PWM
- * - 'P': ajusta o brilho do LED PWM (deve ser seguido pelo valor do brilho)
- * - 'A': lê o valor do potenciômetro
+ * - 'W': ajusta o brilho do LED PWM (deve ser seguido pelo valor do brilho)
+ * - 'P': lê o valor do potenciômetro
  * - 'B': lê o estado do botão
  *
  * O código utiliza os seguintes conceitos e técnicas:
@@ -20,7 +20,6 @@
  * - Polimorfismo: a classe abstrata Controller define uma interface comum para as classes controladoras
  * - Princípio Aberto-Fechado: as classes controladoras implementam suas próprias versões do método control sem modificar o código existente
  * - Comunicação serial: a classe SoftwareSerial é utilizada para ler dados enviados pelo aplicativo Bluetooth
- * - Conversão de tipos: a classe String é utilizada para converter uma string em um valor inteiro
  */
 
 // Incluindo a biblioteca SoftwareSerial
